@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Technical Guide</title>
+  <meta name="description" content="Scrollable technical tutorial guide">
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --bg-soft: #ece7dd;
+      --surface: rgba(255, 255, 255, 0.74);
+      --surface-strong: #fffdf8;
+      --ink: #1d1c19;
+      --muted: #686a70;
+      --faint: #9a958c;
+      --line: rgba(29, 28, 25, 0.1);
+      --line-strong: rgba(29, 28, 25, 0.18);
+      --blue: #246bfe;
+      --green: #2f8f66;
+      --amber: #b97026;
+      --red: #bd4b3e;
+      --shadow: 0 28px 80px rgba(53, 47, 38, 0.1);
+      --shadow-soft: 0 18px 52px rgba(53, 47, 38, 0.07);
+      --font-display: "Geist", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --font-body: "Geist", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "IBM Plex Mono", "Geist Mono", "JetBrains Mono", Consolas, monospace;
+      --page-pad: clamp(1rem, 3vw, 3rem);
+      --container: min(calc(100vw - (var(--page-pad) * 2)), 1420px);
+      --radius-xl: clamp(1.2rem, 2.2vw, 2rem);
+      --radius-lg: clamp(0.9rem, 1.6vw, 1.35rem);
+      --radius-md: clamp(0.65rem, 1vw, 0.95rem);
+      --h1: clamp(2.45rem, 5.6vw, 5.35rem);
+      --h2: clamp(1.7rem, 3vw, 2.95rem);
+      --h3: clamp(1.16rem, 1.65vw, 1.55rem);
+      --body: clamp(1rem, 1.06vw, 1.12rem);
+      --small: clamp(0.8rem, 0.88vw, 0.93rem);
+      --tiny: clamp(0.68rem, 0.76vw, 0.78rem);
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      min-height: 100dvh;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(29, 28, 25, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(29, 28, 25, 0.026) 1px, transparent 1px),
+        linear-gradient(180deg, #fffdf8 0%, var(--bg) 46%, #eee8dd 100%);
+      background-size: 4.5rem 4.5rem, 4.5rem 4.5rem, auto;
+      font-family: var(--font-body);
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    ::selection {
+      background: rgba(36, 107, 254, 0.18);
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      z-index: 9;
+      background: transparent;
+    }
+
+    .progress__bar {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 180ms var(--ease);
+    }
+
+    .topbar {
+      width: var(--container);
+      margin: 0 auto;
+      padding: clamp(1rem, 2.2vw, 2rem) 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.72rem;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: clamp(1.1rem, 2vw, 1.45rem);
+      aspect-ratio: 1;
+      border-radius: 0.42rem;
+      background:
+        linear-gradient(135deg, rgba(36, 107, 254, 0.92), rgba(47, 143, 102, 0.92)),
+        #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 22px rgba(36, 107, 254, 0.14);
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+    }
+
+    .chip,
+    .copy-button,
+    .back-top {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.76);
+      box-shadow: inset 0 0 0 1px var(--line), 0 8px 24px rgba(53, 47, 38, 0.05);
+      color: var(--muted);
+      font: 700 var(--tiny) / 1 var(--font-body);
+    }
+
+    .chip {
+      padding: 0.6rem 0.85rem;
+    }
+
+    .back-top {
+      position: fixed;
+      right: clamp(1rem, 2vw, 2rem);
+      bottom: clamp(1rem, 2vw, 2rem);
+      z-index: 8;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(0.5rem);
+      transition: opacity 240ms var(--ease), transform 240ms var(--ease);
+    }
+
+    .back-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .hero {
+      width: var(--container);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 7rem) 0 clamp(2rem, 5vw, 4.5rem);
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(18rem, 0.68fr);
+      gap: clamp(2rem, 6vw, 6rem);
+      align-items: center;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: clamp(1rem, 2vw, 1.6rem);
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.8);
+      box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+      color: var(--muted);
+      font-size: var(--tiny);
+      font-weight: 800;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 0.52rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0.32rem rgba(47, 143, 102, 0.12);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: var(--font-display);
+      letter-spacing: 0;
+      line-height: 1.05;
+    }
+
+    h1 {
+      max-width: 14ch;
+      font-size: var(--h1);
+      font-weight: 840;
+      text-wrap: balance;
+    }
+
+    h1 span {
+      color: var(--blue);
+    }
+
+    .hero p {
+      max-width: 62ch;
+      margin: clamp(1.2rem, 2.4vw, 1.9rem) 0 0;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.4vw, 1.32rem);
+      line-height: 1.72;
+    }
+
+    .hero-panel {
+      min-width: 0;
+      border-radius: var(--radius-xl);
+      padding: clamp(0.55rem, 1vw, 0.75rem);
+      background: linear-gradient(145deg, rgba(255, 253, 248, 0.95), rgba(236, 231, 221, 0.78));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+    }
+
+    .lesson-device {
+      border-radius: calc(var(--radius-xl) - 0.45rem);
+      background: var(--surface-strong);
+      box-shadow: inset 0 0 0 1px var(--line);
+      padding: clamp(1.1rem, 2.2vw, 1.7rem);
+    }
+
+    .lesson-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 800;
+    }
+
+    .lesson-title {
+      margin-top: clamp(1.2rem, 2.2vw, 1.8rem);
+      font-size: clamp(1.45rem, 2.6vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.08;
+    }
+
+    .lesson-list {
+      margin-top: clamp(1rem, 2vw, 1.6rem);
+      display: grid;
+      gap: 0.72rem;
+    }
+
+    .lesson-item {
+      display: flex;
+      align-items: center;
+      gap: 0.72rem;
+      padding: 0.78rem 0.9rem;
+      border-radius: 1rem;
+      background: rgba(247, 244, 238, 0.82);
+      box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08);
+      color: var(--muted);
+      font-size: var(--small);
+      font-weight: 750;
+    }
+
+    .lesson-dot {
+      width: 0.75rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .lesson-item:nth-child(2) .lesson-dot {
+      background: var(--green);
+    }
+
+    .lesson-item:nth-child(3) .lesson-dot {
+      background: var(--amber);
+    }
+
+    .guide-shell {
+      width: var(--container);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+      gap: clamp(1.5rem, 4vw, 4.5rem);
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: clamp(1rem, 2vw, 2rem);
+      max-height: calc(100dvh - 2rem);
+      overflow: auto;
+      padding: clamp(0.8rem, 1.4vw, 1rem);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, 0.7);
+      box-shadow: inset 0 0 0 1px var(--line), 0 16px 45px rgba(53, 47, 38, 0.045);
+    }
+
+    .sidebar-label {
+      padding: 0.45rem 0.55rem 0.75rem;
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 0.28rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.62rem 0.7rem;
+      border-radius: 0.8rem;
+      color: var(--muted);
+      font-size: var(--small);
+      font-weight: 760;
+      transition: color 220ms var(--ease), background 220ms var(--ease), transform 220ms var(--ease);
+    }
+
+    .nav-link:hover,
+    .nav-link.is-active {
+      color: var(--ink);
+      background: rgba(36, 107, 254, 0.09);
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      gap: clamp(1.2rem, 2.4vw, 2rem);
+      padding-bottom: clamp(4rem, 8vw, 8rem);
+    }
+
+    .guide-section {
+      min-width: 0;
+      scroll-margin-top: 2rem;
+      border-radius: var(--radius-xl);
+      padding: clamp(1.1rem, 2.8vw, 2.6rem);
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.82), rgba(255, 253, 248, 0.64)), var(--surface);
+      box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+    }
+
+    .section-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: clamp(0.8rem, 1.8vw, 1.3rem);
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .section-index {
+      color: var(--blue);
+      font-family: var(--font-mono);
+    }
+
+    h2 {
+      max-width: 18ch;
+      font-size: var(--h2);
+      font-weight: 840;
+      text-wrap: balance;
+    }
+
+    .section-lead,
+    .guide-section p {
+      max-width: 66ch;
+      color: var(--muted);
+      font-size: var(--body);
+    }
+
+    .section-lead {
+      margin: clamp(0.9rem, 1.7vw, 1.4rem) 0 0;
+    }
+
+    .content-grid,
+    .learning-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.7rem, 1.4vw, 1rem);
+      margin-top: clamp(1.1rem, 2vw, 1.8rem);
+    }
+
+    .content-grid.three {
+      grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.92fr) minmax(0, 0.92fr);
+    }
+
+    .card,
+    .callout,
+    .command-card,
+    .timeline,
+    .prompt-template,
+    .checklist,
+    .case-study {
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .card,
+    .checklist,
+    .case-study {
+      min-width: 0;
+      padding: clamp(1rem, 1.7vw, 1.35rem);
+      border-top: 3px solid rgba(36, 107, 254, 0.52);
+      background: rgba(255, 253, 248, 0.86);
+    }
+
+    .card:nth-child(2),
+    .checklist {
+      border-top-color: rgba(47, 143, 102, 0.52);
+    }
+
+    .card:nth-child(3),
+    .case-study {
+      border-top-color: rgba(185, 112, 38, 0.48);
+    }
+
+    .card h3 {
+      font-size: var(--h3);
+      font-weight: 820;
+    }
+
+    .card p,
+    .card li,
+    .case-study dd,
+    .checklist li {
+      color: var(--muted);
+      font-size: var(--small);
+    }
+
+    .card p {
+      margin: 0.65rem 0 0;
+    }
+
+    .card ul {
+      margin: 0.75rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      padding: 0.32rem 0.55rem;
+      border-radius: 0.7rem;
+      background: rgba(36, 107, 254, 0.1);
+      color: var(--blue);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .badge.green {
+      background: rgba(47, 143, 102, 0.12);
+      color: var(--green);
+    }
+
+    .badge.orange {
+      background: rgba(185, 112, 38, 0.12);
+      color: var(--amber);
+    }
+
+    .callout {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      padding: clamp(1rem, 1.7vw, 1.35rem);
+      border-left: 4px solid var(--blue);
+      background: rgba(255, 253, 248, 0.9);
+    }
+
+    .callout[data-variant="warning"] {
+      border-left-color: var(--amber);
+    }
+
+    .callout strong,
+    .case-study strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--muted);
+      font-size: var(--small);
+    }
+
+    .command-card {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(248, 245, 238, 0.98)), var(--surface-strong);
+      box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08), 0 18px 48px rgba(53, 47, 38, 0.065);
+    }
+
+    .command-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(36, 107, 254, 0.055) 1px, transparent 1px),
+        linear-gradient(rgba(29, 28, 25, 0.024) 1px, transparent 1px);
+      background-size: 2.75rem 2.75rem;
+      mask-image: linear-gradient(180deg, black, transparent 82%);
+    }
+
+    .command-card__bar,
+    .prompt-template__bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: clamp(0.75rem, 1.4vw, 1rem) clamp(0.85rem, 1.6vw, 1.15rem);
+      border-bottom: 1px solid var(--line);
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .command-title {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      gap: 0.58rem;
+    }
+
+    .command-light {
+      width: 0.58rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0.28rem rgba(47, 143, 102, 0.12);
+    }
+
+    .copy-button {
+      padding: 0.44rem 0.68rem;
+      cursor: pointer;
+      transition: color 180ms var(--ease), transform 180ms var(--ease), background 180ms var(--ease);
+    }
+
+    .copy-button:hover {
+      color: var(--ink);
+      background: rgba(36, 107, 254, 0.08);
+    }
+
+    .copy-button:active {
+      transform: scale(0.98);
+    }
+
+    .typewriter {
+      position: relative;
+      z-index: 1;
+      min-height: 4.8rem;
+      margin: 0;
+      padding: clamp(1rem, 1.8vw, 1.35rem);
+      color: #282621;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 600 clamp(0.78rem, 0.95vw, 0.93rem) / 1.7 var(--font-mono);
+    }
+
+    .typewriter::before {
+      content: ">";
+      color: var(--blue);
+      margin-right: 0.72rem;
+      font-weight: 700;
+    }
+
+    .typewriter::after {
+      content: "";
+      display: inline-block;
+      width: 0.58em;
+      height: 1.1em;
+      margin-left: 0.18em;
+      vertical-align: -0.18em;
+      border-radius: 0.12em;
+      background: var(--blue);
+      animation: cursor-blink 1s steps(1) infinite;
+    }
+
+    .checklist ul {
+      display: grid;
+      gap: 0.72rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+    }
+
+    .checklist input {
+      margin-top: 0.45rem;
+      accent-color: var(--green);
+    }
+
+    .case-study dl {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+    }
+
+    .case-study dt {
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .case-study dd {
+      margin: 0;
+    }
+
+    .prompt-template {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(248, 245, 238, 0.98)), var(--surface-strong);
+      box-shadow: inset 0 0 0 1px var(--line), 0 18px 48px rgba(53, 47, 38, 0.055);
+    }
+
+    .prompt-template pre {
+      margin: 0;
+      padding: clamp(1rem, 1.8vw, 1.35rem);
+      color: #282621;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 600 clamp(0.78rem, 0.95vw, 0.93rem) / 1.72 var(--font-mono);
+    }
+
+    [data-copy-source] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: pre;
+    }
+
+    @keyframes cursor-blink {
+      0%,
+      48% {
+        opacity: 1;
+      }
+
+      49%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .guide-shell,
+      .content-grid,
+      .content-grid.three,
+      .learning-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        max-height: none;
+      }
+
+      .nav-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      :root {
+        --page-pad: clamp(0.85rem, 4vw, 1rem);
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding-top: 2rem;
+      }
+
+      .nav-list {
+        grid-template-columns: 1fr;
+      }
+
+      .guide-section {
+        padding: 1rem;
+      }
+
+      .section-kicker {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .typewriter::after {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span class="progress__bar" data-progress-bar></span></div>
+  <button class="back-top" type="button" data-back-top>回到顶部</button>
+
+  <header class="topbar" id="top">
+    <a class="brand" href="#top" aria-label="Guide home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Technical Guide</span>
+    </a>
+    <div class="top-actions">
+      <span class="chip">中文教程</span>
+      <span class="chip">Source noted</span>
+      <span class="chip">Guide UI</span>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <div class="eyebrow">技术主题学习路径</div>
+      <h1 id="hero-title">把复杂主题整理成<span>可实践指南</span></h1>
+      <p>这份模板用于把工具、框架、库、CLI、agent skill 或工程方法整理成一页可滚动教程。用真实主题内容替换示例，并在 `source-notes.md` 中记录资料来源和版本 caveat。</p>
+    </div>
+
+    <aside class="hero-panel" aria-label="Guide summary">
+      <div class="lesson-device">
+        <div class="lesson-head"><span>Learning path</span><span>5 chapters</span></div>
+        <div class="lesson-title">先懂边界，再复制命令。</div>
+        <div class="lesson-list">
+          <div class="lesson-item"><span class="lesson-dot"></span><span>确认主题、受众、版本和使用场景</span></div>
+          <div class="lesson-item"><span class="lesson-dot"></span><span>按任务路径组织安装、流程和模式</span></div>
+          <div class="lesson-item"><span class="lesson-dot"></span><span>用验证脚本检查布局、导航和复制</span></div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="guide-shell">
+    <aside class="sidebar" aria-label="章节导航">
+      <div class="sidebar-label">目录</div>
+      <nav aria-label="Guide sections">
+        <ol class="nav-list" data-toc>
+          <li><a class="nav-link is-active" href="#why">01 Why it matters</a></li>
+          <li><a class="nav-link" href="#setup">02 Setup</a></li>
+          <li><a class="nav-link" href="#workflow">03 Workflow</a></li>
+          <li><a class="nav-link" href="#patterns">04 Patterns</a></li>
+          <li><a class="nav-link" href="#practice">05 Practice</a></li>
+        </ol>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="guide-section" id="why">
+        <div class="section-kicker"><span class="section-index">01</span><span>Why this guide exists</span></div>
+        <h2>先解释主题解决什么问题</h2>
+        <p class="section-lead">说明该技术主题适合谁、改变了什么工作流、什么情况下不值得使用。避免泛泛而谈，优先写可操作的判断标准。</p>
+        <div class="content-grid three">
+          <div class="card"><span class="badge">Context</span><h3>使用场景</h3><p>列出读者会遇到的真实任务，以及这个主题如何降低操作成本。</p></div>
+          <div class="card"><span class="badge green">Boundary</span><h3>适用边界</h3><p>写清楚什么时候使用、什么时候继续用现有工具更稳。</p></div>
+          <div class="card"><span class="badge orange">Caveat</span><h3>版本差异</h3><p>把 CLI、API、配置和文档版本差异记录到 `source-notes.md`。</p></div>
+        </div>
+        <div class="callout" data-variant="note">
+          <strong>Version note</strong>
+          <p>不确定的命令或 API 不要硬写成事实。先标出 caveat，再给读者检查路径。</p>
+        </div>
+      </section>
+
+      <section class="guide-section" id="setup">
+        <div class="section-kicker"><span class="section-index">02</span><span>Setup</span></div>
+        <h2>命令要能复制，也要能理解</h2>
+        <p class="section-lead">Command Typewriter 用于展示安装、配置和 prompt。复制按钮必须读取相邻隐藏 code 的 canonical text，而不是读取动画文本。</p>
+        <div class="command-card" data-command-card>
+          <div class="command-card__bar">
+            <span class="command-title"><span class="command-light"></span><span>terminal</span></span>
+            <button class="copy-button" type="button" data-copy-target="install-command">复制</button>
+          </div>
+          <pre class="typewriter" aria-label="Install command" data-typewriter data-typewriter-source="install-command"></pre>
+          <code id="install-command" data-copy-source>npm create example@latest technical-guide</code>
+        </div>
+      </section>
+
+      <section class="guide-section" id="workflow">
+        <div class="section-kicker"><span class="section-index">03</span><span>Workflow</span></div>
+        <h2>把流程写成读者能执行的步骤</h2>
+        <p class="section-lead">每一步都要有输入、动作、输出或检查点。不要只堆命令，命令后面必须解释成功信号和失败时看哪里。</p>
+        <div class="learning-grid">
+          <div class="checklist">
+            <ul>
+              <li><input type="checkbox" aria-label="Freeze sources"><span>冻结资料并记录版本差异。</span></li>
+              <li><input type="checkbox" aria-label="Run first command"><span>运行第一条命令并保存输出。</span></li>
+              <li><input type="checkbox" aria-label="Check result"><span>对照预期结果完成自检。</span></li>
+            </ul>
+          </div>
+          <div class="callout" data-variant="warning">
+            <strong>Common failure</strong>
+            <p>教程不是命令列表。读者需要知道为什么运行、成功是什么样、失败时如何定位。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide-section" id="patterns">
+        <div class="section-kicker"><span class="section-index">04</span><span>Patterns</span></div>
+        <h2>沉淀可复用模式</h2>
+        <p class="section-lead">模式必须告诉读者何时使用、何时不要使用，以及下次如何迁移到类似任务。</p>
+        <div class="case-study">
+          <strong>Case study</strong>
+          <dl>
+            <dt>Context</dt>
+            <dd>团队需要把零散 CLI 经验转成可复用上手指南。</dd>
+            <dt>Decision</dt>
+            <dd>先冻结资料，再按任务路径组织章节，最后验证复制按钮和移动端布局。</dd>
+            <dt>Outcome</dt>
+            <dd>新成员可以按章节完成第一次实践，并能追溯每个命令的来源。</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="guide-section" id="practice">
+        <div class="section-kicker"><span class="section-index">05</span><span>Practice</span></div>
+        <h2>给读者一个可复用 prompt</h2>
+        <p class="section-lead">Prompt template 用于 agent 提示词、迁移模板、复盘模板或调试模板。复制按钮同样读取 canonical code。</p>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>review prompt</span>
+            <button class="copy-button" type="button" data-copy-target="review-prompt">复制</button>
+          </div>
+          <pre aria-hidden="true">请审查这份技术指南，重点检查：
+1. 是否有过期命令
+2. 是否缺少来源 caveat
+3. 是否能按章节完成实践</pre>
+          <code id="review-prompt" data-copy-source>请审查这份技术指南，重点检查：
+1. 是否有过期命令
+2. 是否缺少来源 caveat
+3. 是否能按章节完成实践</code>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const progressBar = document.querySelector("[data-progress-bar]");
+    const backTop = document.querySelector("[data-back-top]");
+    const tocLinks = Array.from(document.querySelectorAll("[data-toc] a"));
+    const sections = tocLinks
+      .map((link) => document.querySelector(link.getAttribute("href")))
+      .filter(Boolean);
+
+    function updateProgress() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+      progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      backTop.classList.toggle("visible", window.scrollY > 640);
+    }
+
+    function updateActiveSection() {
+      const marker = window.scrollY + window.innerHeight * 0.28;
+      let active = sections[0];
+      for (const section of sections) {
+        if (section.offsetTop <= marker) active = section;
+      }
+      tocLinks.forEach((link) => {
+        const isActive = link.getAttribute("href") === `#${active.id}`;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    }
+
+    let ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateProgress();
+        updateActiveSection();
+        ticking = false;
+      });
+    }
+
+    async function copyCanonicalText(button) {
+      const id = button.dataset.copyTarget;
+      const source = document.getElementById(id);
+      if (!source || !source.matches("[data-copy-source]")) {
+        button.textContent = "缺少来源";
+        return;
+      }
+      const original = button.textContent;
+      try {
+        await navigator.clipboard.writeText(source.textContent);
+        button.textContent = "已复制";
+      } catch {
+        button.textContent = "复制失败";
+      }
+      window.setTimeout(() => {
+        button.textContent = original;
+      }, 1400);
+    }
+
+    function startTypewriters() {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.querySelectorAll("[data-typewriter]").forEach((target) => {
+        const source = document.getElementById(target.dataset.typewriterSource);
+        const text = source ? source.textContent : "";
+        if (reduceMotion) {
+          target.textContent = text;
+          return;
+        }
+        let index = 0;
+        const step = () => {
+          target.textContent = text.slice(0, index);
+          index += 1;
+          if (index <= text.length) window.setTimeout(step, 18);
+        };
+        step();
+      });
+    }
+
+    document.querySelectorAll("[data-copy-target]").forEach((button) => {
+      button.addEventListener("click", () => copyCanonicalText(button));
+    });
+
+    backTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    updateProgress();
+    updateActiveSection();
+    startTypewriters();
+  </script>
+</body>
+</html>
