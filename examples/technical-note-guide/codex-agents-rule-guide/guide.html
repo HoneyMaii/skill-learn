@@ -1,0 +1,1415 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Codex AGENTS.md 与 Rules 中文完整教程，覆盖定位、创建、规则写法、模板、调试和维护。">
+  <title>Codex AGENTS.md 与 Rules 完整教程</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --bg-soft: #ece7dd;
+      --surface: rgba(255, 255, 255, 0.74);
+      --surface-strong: #fffdf8;
+      --ink: #1d1c19;
+      --muted: #686a70;
+      --faint: #9a958c;
+      --line: rgba(29, 28, 25, 0.1);
+      --line-strong: rgba(29, 28, 25, 0.18);
+      --blue: #246bfe;
+      --green: #2f8f66;
+      --amber: #b97026;
+      --red: #bd4b3e;
+      --shadow: 0 28px 80px rgba(53, 47, 38, 0.1);
+      --shadow-soft: 0 18px 52px rgba(53, 47, 38, 0.07);
+      --font-display: "Geist", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --font-body: "Geist", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "IBM Plex Mono", "Geist Mono", "JetBrains Mono", Consolas, monospace;
+      --page-pad: clamp(1rem, 3vw, 3rem);
+      --container: min(calc(100vw - (var(--page-pad) * 2)), 1420px);
+      --radius-xl: clamp(1.2rem, 2.2vw, 2rem);
+      --radius-lg: clamp(0.9rem, 1.6vw, 1.35rem);
+      --radius-md: clamp(0.65rem, 1vw, 0.95rem);
+      --h1: clamp(2.35rem, 5.2vw, 5.1rem);
+      --h2: clamp(1.68rem, 2.9vw, 2.85rem);
+      --h3: clamp(1.16rem, 1.65vw, 1.55rem);
+      --body: clamp(1rem, 1.06vw, 1.12rem);
+      --small: clamp(0.82rem, 0.9vw, 0.95rem);
+      --tiny: clamp(0.68rem, 0.76vw, 0.78rem);
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      min-height: 100dvh;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(29, 28, 25, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(29, 28, 25, 0.026) 1px, transparent 1px),
+        linear-gradient(180deg, #fffdf8 0%, var(--bg) 46%, #eee8dd 100%);
+      background-size: 4.5rem 4.5rem, 4.5rem 4.5rem, auto;
+      font-family: var(--font-body);
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    ::selection {
+      background: rgba(36, 107, 254, 0.18);
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      z-index: 9;
+      background: transparent;
+    }
+
+    .progress__bar {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 180ms var(--ease);
+    }
+
+    .topbar {
+      width: var(--container);
+      margin: 0 auto;
+      padding: clamp(1rem, 2.2vw, 2rem) 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.72rem;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: clamp(1.1rem, 2vw, 1.45rem);
+      aspect-ratio: 1;
+      border-radius: 0.42rem;
+      background:
+        linear-gradient(135deg, rgba(36, 107, 254, 0.92), rgba(47, 143, 102, 0.92)),
+        #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 22px rgba(36, 107, 254, 0.14);
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+    }
+
+    .chip,
+    .copy-button,
+    .back-top {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.76);
+      box-shadow: inset 0 0 0 1px var(--line), 0 8px 24px rgba(53, 47, 38, 0.05);
+      color: var(--muted);
+      font: 700 var(--tiny) / 1 var(--font-body);
+    }
+
+    .chip {
+      padding: 0.6rem 0.85rem;
+    }
+
+    .back-top {
+      position: fixed;
+      right: clamp(1rem, 2vw, 2rem);
+      bottom: clamp(1rem, 2vw, 2rem);
+      z-index: 8;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(0.5rem);
+      transition: opacity 240ms var(--ease), transform 240ms var(--ease);
+    }
+
+    .back-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .hero {
+      width: var(--container);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 7rem) 0 clamp(2rem, 5vw, 4.5rem);
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(18rem, 0.68fr);
+      gap: clamp(2rem, 6vw, 6rem);
+      align-items: center;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: clamp(1rem, 2vw, 1.6rem);
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.8);
+      box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+      color: var(--muted);
+      font-size: var(--tiny);
+      font-weight: 800;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 0.52rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0.32rem rgba(47, 143, 102, 0.12);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: var(--font-display);
+      letter-spacing: 0;
+      line-height: 1.05;
+    }
+
+    h1 {
+      max-width: 14ch;
+      font-size: var(--h1);
+      font-weight: 840;
+      text-wrap: balance;
+    }
+
+    h1 span {
+      color: var(--blue);
+    }
+
+    .hero p {
+      max-width: 62ch;
+      margin: clamp(1.2rem, 2.4vw, 1.9rem) 0 0;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.4vw, 1.32rem);
+      line-height: 1.72;
+    }
+
+    .hero-panel {
+      min-width: 0;
+      border-radius: var(--radius-xl);
+      padding: clamp(0.55rem, 1vw, 0.75rem);
+      background: linear-gradient(145deg, rgba(255, 253, 248, 0.95), rgba(236, 231, 221, 0.78));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+    }
+
+    .lesson-device {
+      border-radius: calc(var(--radius-xl) - 0.45rem);
+      background: var(--surface-strong);
+      box-shadow: inset 0 0 0 1px var(--line);
+      padding: clamp(1.1rem, 2.2vw, 1.7rem);
+    }
+
+    .lesson-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 800;
+    }
+
+    .lesson-title {
+      margin-top: clamp(1.2rem, 2.2vw, 1.8rem);
+      font-size: clamp(1.45rem, 2.6vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.08;
+    }
+
+    .lesson-list {
+      margin-top: clamp(1rem, 2vw, 1.6rem);
+      display: grid;
+      gap: 0.72rem;
+    }
+
+    .lesson-item {
+      display: flex;
+      align-items: center;
+      gap: 0.72rem;
+      padding: 0.78rem 0.9rem;
+      border-radius: 1rem;
+      background: rgba(247, 244, 238, 0.82);
+      box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08);
+      color: var(--muted);
+      font-size: var(--small);
+      font-weight: 750;
+    }
+
+    .lesson-dot {
+      width: 0.75rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .lesson-item:nth-child(2) .lesson-dot {
+      background: var(--green);
+    }
+
+    .lesson-item:nth-child(3) .lesson-dot {
+      background: var(--amber);
+    }
+
+    .guide-shell {
+      width: var(--container);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+      gap: clamp(1.5rem, 4vw, 4.5rem);
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: clamp(1rem, 2vw, 2rem);
+      max-height: calc(100dvh - 2rem);
+      overflow: auto;
+      padding: clamp(0.8rem, 1.4vw, 1rem);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, 0.7);
+      box-shadow: inset 0 0 0 1px var(--line), 0 16px 45px rgba(53, 47, 38, 0.045);
+    }
+
+    .sidebar-label {
+      padding: 0.45rem 0.55rem 0.75rem;
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 0.28rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.62rem 0.7rem;
+      border-radius: 0.8rem;
+      color: var(--muted);
+      font-size: var(--small);
+      font-weight: 760;
+      transition: color 220ms var(--ease), background 220ms var(--ease), transform 220ms var(--ease);
+    }
+
+    .nav-link:hover,
+    .nav-link.is-active {
+      color: var(--ink);
+      background: rgba(36, 107, 254, 0.09);
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      gap: clamp(1.2rem, 2.4vw, 2rem);
+      padding-bottom: clamp(4rem, 8vw, 8rem);
+    }
+
+    .guide-section {
+      min-width: 0;
+      scroll-margin-top: 2rem;
+      border-radius: var(--radius-xl);
+      padding: clamp(1.1rem, 2.8vw, 2.6rem);
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.82), rgba(255, 253, 248, 0.64)), var(--surface);
+      box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+    }
+
+    .section-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: clamp(0.8rem, 1.8vw, 1.3rem);
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .section-index {
+      color: var(--blue);
+      font-family: var(--font-mono);
+    }
+
+    h2 {
+      max-width: 18ch;
+      font-size: var(--h2);
+      font-weight: 840;
+      text-wrap: balance;
+    }
+
+    .section-lead,
+    .guide-section p {
+      max-width: 66ch;
+      color: var(--muted);
+      font-size: var(--body);
+    }
+
+    .section-lead {
+      margin: clamp(0.9rem, 1.7vw, 1.4rem) 0 0;
+    }
+
+    .content-grid,
+    .learning-grid,
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.7rem, 1.4vw, 1rem);
+      margin-top: clamp(1.1rem, 2vw, 1.8rem);
+    }
+
+    .content-grid.three {
+      grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.92fr) minmax(0, 0.92fr);
+    }
+
+    .card,
+    .callout,
+    .command-card,
+    .prompt-template,
+    .checklist,
+    .case-study,
+    .table-wrap {
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .card,
+    .checklist,
+    .case-study {
+      min-width: 0;
+      padding: clamp(1rem, 1.7vw, 1.35rem);
+      border-top: 3px solid rgba(36, 107, 254, 0.52);
+      background: rgba(255, 253, 248, 0.86);
+    }
+
+    .card:nth-child(2),
+    .checklist {
+      border-top-color: rgba(47, 143, 102, 0.52);
+    }
+
+    .card:nth-child(3),
+    .case-study {
+      border-top-color: rgba(185, 112, 38, 0.48);
+    }
+
+    .card h3 {
+      font-size: var(--h3);
+      font-weight: 820;
+    }
+
+    .card p,
+    .card li,
+    .case-study dd,
+    .checklist li,
+    .table-wrap td,
+    .table-wrap th {
+      color: var(--muted);
+      font-size: var(--small);
+    }
+
+    .card p {
+      margin: 0.65rem 0 0;
+    }
+
+    .card ul {
+      margin: 0.75rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      padding: 0.32rem 0.55rem;
+      border-radius: 0.7rem;
+      background: rgba(36, 107, 254, 0.1);
+      color: var(--blue);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .badge.green {
+      background: rgba(47, 143, 102, 0.12);
+      color: var(--green);
+    }
+
+    .badge.orange {
+      background: rgba(185, 112, 38, 0.12);
+      color: var(--amber);
+    }
+
+    .callout {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      padding: clamp(1rem, 1.7vw, 1.35rem);
+      border-left: 4px solid var(--blue);
+      background: rgba(255, 253, 248, 0.9);
+    }
+
+    .callout[data-variant="warning"] {
+      border-left-color: var(--amber);
+    }
+
+    .callout[data-variant="danger"] {
+      border-left-color: var(--red);
+    }
+
+    .callout strong,
+    .case-study strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--muted);
+      font-size: var(--small);
+    }
+
+    .command-card,
+    .prompt-template {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(248, 245, 238, 0.98)), var(--surface-strong);
+      box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08), 0 18px 48px rgba(53, 47, 38, 0.065);
+    }
+
+    .command-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(36, 107, 254, 0.055) 1px, transparent 1px),
+        linear-gradient(rgba(29, 28, 25, 0.024) 1px, transparent 1px);
+      background-size: 2.75rem 2.75rem;
+      mask-image: linear-gradient(180deg, black, transparent 82%);
+    }
+
+    .command-card__bar,
+    .prompt-template__bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: clamp(0.75rem, 1.4vw, 1rem) clamp(0.85rem, 1.6vw, 1.15rem);
+      border-bottom: 1px solid var(--line);
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+    }
+
+    .command-title {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      gap: 0.58rem;
+    }
+
+    .command-light {
+      width: 0.58rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0.28rem rgba(47, 143, 102, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .copy-button {
+      padding: 0.44rem 0.68rem;
+      cursor: pointer;
+      transition: color 180ms var(--ease), transform 180ms var(--ease), background 180ms var(--ease);
+      flex: 0 0 auto;
+    }
+
+    .copy-button:hover {
+      color: var(--ink);
+      background: rgba(36, 107, 254, 0.08);
+    }
+
+    .copy-button:active {
+      transform: scale(0.98);
+    }
+
+    .typewriter,
+    .prompt-template pre {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      padding: clamp(1rem, 1.8vw, 1.35rem);
+      color: #282621;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 600 clamp(0.78rem, 0.95vw, 0.93rem) / 1.72 var(--font-mono);
+    }
+
+    .typewriter {
+      min-height: 4.8rem;
+    }
+
+    .typewriter::before {
+      content: ">";
+      color: var(--blue);
+      margin-right: 0.72rem;
+      font-weight: 700;
+    }
+
+    .typewriter::after {
+      content: "";
+      display: inline-block;
+      width: 0.58em;
+      height: 1.1em;
+      margin-left: 0.18em;
+      vertical-align: -0.18em;
+      border-radius: 0.12em;
+      background: var(--blue);
+      animation: cursor-blink 1s steps(1) infinite;
+    }
+
+    [data-copy-source] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: pre;
+    }
+
+    .checklist ul {
+      display: grid;
+      gap: 0.72rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+    }
+
+    .checklist input {
+      margin-top: 0.45rem;
+      accent-color: var(--green);
+    }
+
+    .case-study dl {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+    }
+
+    .case-study dt {
+      color: var(--faint);
+      font-size: var(--tiny);
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .case-study dd {
+      margin: 0;
+    }
+
+    .table-wrap {
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+      overflow-x: auto;
+      background: rgba(255, 253, 248, 0.9);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 42rem;
+    }
+
+    th,
+    td {
+      padding: 0.9rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: var(--ink);
+      font-weight: 850;
+      background: rgba(247, 244, 238, 0.82);
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .source-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .source-links a {
+      border-radius: 999px;
+      padding: 0.58rem 0.75rem;
+      background: rgba(36, 107, 254, 0.08);
+      color: var(--blue);
+      font-size: var(--tiny);
+      font-weight: 850;
+      box-shadow: inset 0 0 0 1px rgba(36, 107, 254, 0.12);
+    }
+
+    @keyframes cursor-blink {
+      0%,
+      48% {
+        opacity: 1;
+      }
+
+      49%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .guide-shell,
+      .content-grid,
+      .content-grid.three,
+      .learning-grid,
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        max-height: none;
+      }
+
+      .nav-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      :root {
+        --page-pad: clamp(0.85rem, 4vw, 1rem);
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding-top: 2rem;
+      }
+
+      .nav-list {
+        grid-template-columns: 1fr;
+      }
+
+      .guide-section {
+        padding: 1rem;
+      }
+
+      .section-kicker,
+      .command-card__bar,
+      .prompt-template__bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      table {
+        min-width: 36rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .typewriter::after {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span class="progress__bar" data-progress-bar></span></div>
+  <button class="back-top" type="button" data-back-top>回到顶部</button>
+
+  <header class="topbar" id="top">
+    <a class="brand" href="#top" aria-label="Guide home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Codex Guide</span>
+    </a>
+    <div class="top-actions">
+      <span class="chip">中文教程</span>
+      <span class="chip">AGENTS.md</span>
+      <span class="chip">Rules</span>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <div class="eyebrow">项目指令与执行权限学习路径</div>
+      <h1 id="hero-title">Codex <span>AGENTS.md 与 Rules</span> 完整教程</h1>
+      <p>这份教程教你把项目协作规则写进 `AGENTS.md`，并理解 Codex Rules 如何控制沙箱外命令审批。核心原则很简单：`AGENTS.md` 写给 agent 读，Rules 写给执行策略用。</p>
+    </div>
+
+    <aside class="hero-panel" aria-label="Guide summary">
+      <div class="lesson-device">
+        <div class="lesson-head"><span>Learning path</span><span>7 chapters</span></div>
+        <div class="lesson-title">先写清项目语义，再收紧执行边界。</div>
+        <div class="lesson-list">
+          <div class="lesson-item"><span class="lesson-dot"></span><span>定位 `AGENTS.md` 的作用范围和优先级</span></div>
+          <div class="lesson-item"><span class="lesson-dot"></span><span>把规则拆成语言、代码、安全和流程块</span></div>
+          <div class="lesson-item"><span class="lesson-dot"></span><span>用 Rules 管住沙箱外命令和审批策略</span></div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="guide-shell">
+    <aside class="sidebar" aria-label="章节导航">
+      <div class="sidebar-label">目录</div>
+      <nav aria-label="Guide sections">
+        <ol class="nav-list" data-toc>
+          <li><a class="nav-link is-active" href="#position">01 定位</a></li>
+          <li><a class="nav-link" href="#create">02 创建文件</a></li>
+          <li><a class="nav-link" href="#rule-blocks">03 规则块</a></li>
+          <li><a class="nav-link" href="#codex-rules">04 Rules</a></li>
+          <li><a class="nav-link" href="#templates">05 模板</a></li>
+          <li><a class="nav-link" href="#debug">06 调试</a></li>
+          <li><a class="nav-link" href="#maintenance">07 维护</a></li>
+        </ol>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="guide-section" id="position">
+        <div class="section-kicker"><span class="section-index">01</span><span>What AGENTS.md is for</span></div>
+        <h2>`AGENTS.md` 是项目里的 agent 使用说明</h2>
+        <p class="section-lead">可以把它理解成给 Codex 看的项目说明书。它不替代 README，也不替代 CI 配置；它负责告诉 agent 在这个仓库里如何工作、如何验证、哪些事情必须先确认。</p>
+        <div class="content-grid three">
+          <div class="card">
+            <span class="badge">Scope</span>
+            <h3>作用范围</h3>
+            <p>根目录文件通常覆盖整个仓库。子目录里的 `AGENTS.md` 可以补充该目录的局部约定，更深层说明对更具体的文件生效。</p>
+          </div>
+          <div class="card">
+            <span class="badge green">Priority</span>
+            <h3>优先级</h3>
+            <p>用户当次消息优先于仓库说明。系统和开发者指令仍然更高层。`AGENTS.md` 适合表达项目规则，不适合绕过安全边界。</p>
+          </div>
+          <div class="card">
+            <span class="badge orange">Content</span>
+            <h3>写什么</h3>
+            <p>写构建命令、测试命令、代码风格、文档语言、数据库安全、分支策略、验收标准和需要人工确认的高风险操作。</p>
+          </div>
+        </div>
+        <div class="callout" data-variant="warning">
+          <strong>不要把所有偏好都塞进去</strong>
+          <p>好的 `AGENTS.md` 是可执行的约束，不是愿望清单。每条规则都应该能回答：什么情况下触发，agent 应该做什么，什么情况下必须停下来问用户。</p>
+        </div>
+        <div class="source-links">
+          <a href="https://developers.openai.com/codex/guides/agents-md" target="_blank" rel="noreferrer">OpenAI AGENTS.md guide</a>
+          <a href="https://agents.md/" target="_blank" rel="noreferrer">AGENTS.md community guide</a>
+        </div>
+      </section>
+
+      <section class="guide-section" id="create">
+        <div class="section-kicker"><span class="section-index">02</span><span>Create the file</span></div>
+        <h2>从一个最小文件开始</h2>
+        <p class="section-lead">先在仓库根目录创建 `AGENTS.md`。如果某个子项目有完全不同的技术栈或安全规则，再在子目录补一个局部文件。</p>
+        <div class="command-card" data-command-card>
+          <div class="command-card__bar">
+            <span class="command-title"><span class="command-light"></span><span>PowerShell</span></span>
+            <button class="copy-button" type="button" data-copy-target="create-agents-command">复制</button>
+          </div>
+          <pre class="typewriter" aria-label="Create AGENTS command" data-typewriter data-typewriter-source="create-agents-command"></pre>
+          <code id="create-agents-command" data-copy-source>New-Item -ItemType File -Path .\AGENTS.md</code>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>最小 AGENTS.md</span>
+            <button class="copy-button" type="button" data-copy-target="minimal-agents">复制</button>
+          </div>
+          <pre aria-hidden="true"># AGENTS.md
+
+## 项目说明
+
+这是一个 [项目类型] 项目。请先阅读 README，再修改代码。
+
+## 常用命令
+
+- 安装依赖：`npm install`
+- 本地开发：`npm run dev`
+- 验证变更：`npm test`
+
+## 工作规则
+
+- 默认使用简体中文回复。
+- 修改代码前先理解现有结构。
+- 不要主动改动无关文件。
+- 完成后说明修改内容和验证结果。</pre>
+          <code id="minimal-agents" data-copy-source># AGENTS.md
+
+## 项目说明
+
+这是一个 [项目类型] 项目。请先阅读 README，再修改代码。
+
+## 常用命令
+
+- 安装依赖：`npm install`
+- 本地开发：`npm run dev`
+- 验证变更：`npm test`
+
+## 工作规则
+
+- 默认使用简体中文回复。
+- 修改代码前先理解现有结构。
+- 不要主动改动无关文件。
+- 完成后说明修改内容和验证结果。</code>
+        </div>
+        <div class="callout">
+          <strong>放置建议</strong>
+          <p>根目录写全局规则。`apps/web/AGENTS.md`、`services/api/AGENTS.md` 这类子目录文件只写局部差异，不重复根目录已经说明的内容。</p>
+        </div>
+      </section>
+
+      <section class="guide-section" id="rule-blocks">
+        <div class="section-kicker"><span class="section-index">03</span><span>Write executable instructions</span></div>
+        <h2>把规则写成可执行的块</h2>
+        <p class="section-lead">规则块越具体，agent 越容易稳定执行。推荐按语言、代码、测试、安全、文档、交付拆分，而不是写一段长散文。</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>规则块</th>
+                <th>适合写什么</th>
+                <th>避免写什么</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>语言规则</td>
+                <td>回复语言、文档语言、错误日志是否保留原文。</td>
+                <td>要求翻译代码标识符或第三方 API 名称。</td>
+              </tr>
+              <tr>
+                <td>工程规则</td>
+                <td>代码风格、目录边界、测试命令、提交前检查。</td>
+                <td>和 formatter、linter 冲突的个人偏好。</td>
+              </tr>
+              <tr>
+                <td>安全规则</td>
+                <td>数据库、生产环境、密钥、删除文件、外部服务调用。</td>
+                <td>模糊的“谨慎操作”，没有说明何时要确认。</td>
+              </tr>
+              <tr>
+                <td>交付规则</td>
+                <td>最终回复格式、验证证据、已知风险、后续建议。</td>
+                <td>要求 agent 声称完成但不跑验证。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>增强版规则块</span>
+            <button class="copy-button" type="button" data-copy-target="structured-rules">复制</button>
+          </div>
+          <pre aria-hidden="true">## 语言规则
+
+- 默认使用简体中文回复用户。
+- 代码标识符、命令、配置键、日志原文和错误栈保持原文。
+
+## 编辑规则
+
+- 修改前先阅读相关文件和现有模式。
+- 不要重构无关代码。
+- 不要覆盖用户未明确要求回退的改动。
+
+## 验证规则
+
+- 代码修改后运行最小相关验证命令。
+- 如果无法运行验证，说明原因和残余风险。
+
+## 数据库安全规则
+
+- 未经明确授权，不创建或修改迁移脚本。
+- 未经明确授权，不执行 `INSERT`、`UPDATE`、`DELETE`、`ALTER TABLE`、`DROP TABLE`。
+- 如果需要数据库变更，先说明原因、影响范围和拟执行 SQL，等待确认。</pre>
+          <code id="structured-rules" data-copy-source>## 语言规则
+
+- 默认使用简体中文回复用户。
+- 代码标识符、命令、配置键、日志原文和错误栈保持原文。
+
+## 编辑规则
+
+- 修改前先阅读相关文件和现有模式。
+- 不要重构无关代码。
+- 不要覆盖用户未明确要求回退的改动。
+
+## 验证规则
+
+- 代码修改后运行最小相关验证命令。
+- 如果无法运行验证，说明原因和残余风险。
+
+## 数据库安全规则
+
+- 未经明确授权，不创建或修改迁移脚本。
+- 未经明确授权，不执行 `INSERT`、`UPDATE`、`DELETE`、`ALTER TABLE`、`DROP TABLE`。
+- 如果需要数据库变更，先说明原因、影响范围和拟执行 SQL，等待确认。</code>
+        </div>
+        <div class="callout" data-variant="danger">
+          <strong>强规则要写触发条件</strong>
+          <p>例如“不得修改数据库”不够完整。更稳的写法是“除非用户明确提出修改表结构，否则不得创建迁移或执行 DDL”。</p>
+        </div>
+      </section>
+
+      <section class="guide-section" id="codex-rules">
+        <div class="section-kicker"><span class="section-index">04</span><span>Codex Rules</span></div>
+        <h2>Rules 管执行权限，不管项目语义</h2>
+        <p class="section-lead">Codex Rules 是审批策略：允许、阻止或要求确认某类命令能否在沙箱外运行。它解决的是“能不能执行这个外部动作”，不是“这个项目怎么写代码”。</p>
+        <div class="compare-grid">
+          <div class="card">
+            <span class="badge">AGENTS.md</span>
+            <h3>写给 agent</h3>
+            <p>描述项目知识、协作方式、验证流程和安全边界。它让 agent 知道如何做事。</p>
+            <ul>
+              <li>默认回复语言</li>
+              <li>测试命令和构建命令</li>
+              <li>数据库变更确认规则</li>
+              <li>代码审查输出格式</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="badge green">Rules</span>
+            <h3>写给运行策略</h3>
+            <p>定义命令审批行为，尤其是沙箱外命令。它让 Codex 知道哪些命令可以放行。</p>
+            <ul>
+              <li>允许 `npm test` 类验证命令</li>
+              <li>要求确认 `git push`</li>
+              <li>阻止删除或重置类命令</li>
+              <li>收紧网络或安装行为</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" data-variant="warning">
+          <strong>不要用 AGENTS.md 伪装权限控制</strong>
+          <p>你可以在 `AGENTS.md` 里写“运行危险命令前必须确认”，但真正的命令审批仍由 Codex 环境、沙箱和 Rules 决定。两层都要配置清楚。</p>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>Rules 设计清单</span>
+            <button class="copy-button" type="button" data-copy-target="rules-checklist">复制</button>
+          </div>
+          <pre aria-hidden="true">为 Codex Rules 设计审批策略时，逐项确认：
+
+1. 哪些验证命令可以自动放行？
+2. 哪些安装、网络或部署命令必须询问？
+3. 哪些删除、重置、清库、发布命令必须阻止或强确认？
+4. 是否存在团队统一规则，不允许个人覆盖？
+5. 规则是否足够窄，避免把任意脚本都放行？</pre>
+          <code id="rules-checklist" data-copy-source>为 Codex Rules 设计审批策略时，逐项确认：
+
+1. 哪些验证命令可以自动放行？
+2. 哪些安装、网络或部署命令必须询问？
+3. 哪些删除、重置、清库、发布命令必须阻止或强确认？
+4. 是否存在团队统一规则，不允许个人覆盖？
+5. 规则是否足够窄，避免把任意脚本都放行？</code>
+        </div>
+        <div class="source-links">
+          <a href="https://developers.openai.com/codex/rules" target="_blank" rel="noreferrer">OpenAI Codex Rules</a>
+        </div>
+      </section>
+
+      <section class="guide-section" id="templates">
+        <div class="section-kicker"><span class="section-index">05</span><span>Copy-ready templates</span></div>
+        <h2>从模板开始，再按项目收紧</h2>
+        <p class="section-lead">模板不是最终答案。复制后要替换命令、目录、测试策略和安全边界。最重要的是把“需要确认”的条件写具体。</p>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>团队项目模板</span>
+            <button class="copy-button" type="button" data-copy-target="team-template">复制</button>
+          </div>
+          <pre aria-hidden="true"># AGENTS.md
+
+## 项目上下文
+
+这是一个团队协作项目。修改代码前请先理解 README、现有目录结构和相邻实现。
+
+## 回复规则
+
+- 默认使用简体中文。
+- 命令、代码标识符、错误栈、第三方 API 名称保持原文。
+- 结论先行，避免无关铺垫。
+
+## 工作规则
+
+- 不主动修改无关文件。
+- 不回退用户已有改动，除非用户明确要求。
+- 涉及跨模块行为时，优先补充或更新相关测试。
+- 完成后说明修改文件、验证命令和残余风险。
+
+## 需要确认的操作
+
+- 修改数据库结构或数据。
+- 删除文件、重置分支、强推、发布、部署。
+- 安装新依赖或引入新的外部服务。</pre>
+          <code id="team-template" data-copy-source># AGENTS.md
+
+## 项目上下文
+
+这是一个团队协作项目。修改代码前请先理解 README、现有目录结构和相邻实现。
+
+## 回复规则
+
+- 默认使用简体中文。
+- 命令、代码标识符、错误栈、第三方 API 名称保持原文。
+- 结论先行，避免无关铺垫。
+
+## 工作规则
+
+- 不主动修改无关文件。
+- 不回退用户已有改动，除非用户明确要求。
+- 涉及跨模块行为时，优先补充或更新相关测试。
+- 完成后说明修改文件、验证命令和残余风险。
+
+## 需要确认的操作
+
+- 修改数据库结构或数据。
+- 删除文件、重置分支、强推、发布、部署。
+- 安装新依赖或引入新的外部服务。</code>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>前端项目模板</span>
+            <button class="copy-button" type="button" data-copy-target="frontend-template">复制</button>
+          </div>
+          <pre aria-hidden="true">## 前端规则
+
+- 遵循现有设计系统和组件模式。
+- 不新增 UI 框架，除非用户明确要求。
+- 文本必须在移动端和桌面端都不溢出容器。
+- 图标优先使用项目已有图标库。
+- 修改交互后，用浏览器或截图验证关键视口。
+
+## 验证命令
+
+- 类型检查：`npm run typecheck`
+- 单元测试：`npm test`
+- 构建：`npm run build`</pre>
+          <code id="frontend-template" data-copy-source>## 前端规则
+
+- 遵循现有设计系统和组件模式。
+- 不新增 UI 框架，除非用户明确要求。
+- 文本必须在移动端和桌面端都不溢出容器。
+- 图标优先使用项目已有图标库。
+- 修改交互后，用浏览器或截图验证关键视口。
+
+## 验证命令
+
+- 类型检查：`npm run typecheck`
+- 单元测试：`npm test`
+- 构建：`npm run build`</code>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>后端与数据库安全模板</span>
+            <button class="copy-button" type="button" data-copy-target="backend-db-template">复制</button>
+          </div>
+          <pre aria-hidden="true">## 后端规则
+
+- 修改 API 行为时同步检查调用方和测试。
+- 不在日志中输出密钥、令牌、连接串或个人敏感信息。
+- 不把生产配置写入仓库。
+
+## 数据库安全规则
+
+- 未经用户明确授权，不创建、修改或执行迁移。
+- 未经用户明确授权，不执行会修改数据的 SQL。
+- 需要数据库变更时，先说明原因、影响范围、回滚方式和拟执行语句。
+- 只读查询可以用于分析，但要避免扫描超大表。</pre>
+          <code id="backend-db-template" data-copy-source>## 后端规则
+
+- 修改 API 行为时同步检查调用方和测试。
+- 不在日志中输出密钥、令牌、连接串或个人敏感信息。
+- 不把生产配置写入仓库。
+
+## 数据库安全规则
+
+- 未经用户明确授权，不创建、修改或执行迁移。
+- 未经用户明确授权，不执行会修改数据的 SQL。
+- 需要数据库变更时，先说明原因、影响范围、回滚方式和拟执行语句。
+- 只读查询可以用于分析，但要避免扫描超大表。</code>
+        </div>
+      </section>
+
+      <section class="guide-section" id="debug">
+        <div class="section-kicker"><span class="section-index">06</span><span>Debug instructions</span></div>
+        <h2>规则不生效时，先查范围和冲突</h2>
+        <p class="section-lead">大多数问题不是 agent “没听话”，而是规则太模糊、作用范围不对、和更高优先级指令冲突，或把执行权限规则误写进了项目说明。</p>
+        <div class="learning-grid">
+          <div class="checklist">
+            <ul>
+              <li><input type="checkbox" aria-label="Check location"><span>确认 `AGENTS.md` 位于仓库根目录或目标子目录。</span></li>
+              <li><input type="checkbox" aria-label="Check scope"><span>确认正在修改的文件落在该规则的作用范围内。</span></li>
+              <li><input type="checkbox" aria-label="Check conflict"><span>检查是否和用户当次要求、系统规则或开发者规则冲突。</span></li>
+              <li><input type="checkbox" aria-label="Check wording"><span>把模糊规则改成触发条件和具体动作。</span></li>
+              <li><input type="checkbox" aria-label="Check rules"><span>命令审批问题去检查 Codex Rules，而不是只改 `AGENTS.md`。</span></li>
+            </ul>
+          </div>
+          <div class="case-study">
+            <strong>Case study</strong>
+            <dl>
+              <dt>Context</dt>
+              <dd>团队写了“谨慎操作数据库”，但 agent 仍然生成迁移。</dd>
+              <dt>Decision</dt>
+              <dd>改成“除非用户明确要求修改表结构，否则不得创建或修改迁移脚本”。</dd>
+              <dt>Outcome</dt>
+              <dd>规则从价值判断变成可执行条件，agent 可以判断何时必须停下来确认。</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>规则审查 prompt</span>
+            <button class="copy-button" type="button" data-copy-target="review-prompt">复制</button>
+          </div>
+          <pre aria-hidden="true">请审查这份 AGENTS.md，重点检查：
+
+1. 是否有模糊规则无法执行？
+2. 是否有规则和工具、CI、formatter 或安全策略冲突？
+3. 是否把 Codex Rules 应该处理的命令审批写成了普通文本？
+4. 哪些操作需要明确人工确认？
+5. 是否缺少项目真实验证命令？</pre>
+          <code id="review-prompt" data-copy-source>请审查这份 AGENTS.md，重点检查：
+
+1. 是否有模糊规则无法执行？
+2. 是否有规则和工具、CI、formatter 或安全策略冲突？
+3. 是否把 Codex Rules 应该处理的命令审批写成了普通文本？
+4. 哪些操作需要明确人工确认？
+5. 是否缺少项目真实验证命令？</code>
+        </div>
+      </section>
+
+      <section class="guide-section" id="maintenance">
+        <div class="section-kicker"><span class="section-index">07</span><span>Maintenance</span></div>
+        <h2>把规则当成工程资产维护</h2>
+        <p class="section-lead">`AGENTS.md` 会随着项目变化过期。每次技术栈、命令、目录、数据库策略或部署方式变化，都要同步更新，否则 agent 会被旧规则带偏。</p>
+        <div class="content-grid">
+          <div class="card">
+            <span class="badge">Review cycle</span>
+            <h3>什么时候更新</h3>
+            <p>新增测试命令、迁移框架、部署流程、目录结构、代码规范、安全策略时，立刻更新。不要等到下次 agent 犯错后再补。</p>
+          </div>
+          <div class="card">
+            <span class="badge green">Ownership</span>
+            <h3>谁来维护</h3>
+            <p>团队项目应把 `AGENTS.md` 当作代码审查的一部分。涉及权限和数据库的规则，最好由模块负责人或安全负责人确认。</p>
+          </div>
+        </div>
+        <div class="prompt-template">
+          <div class="prompt-template__bar">
+            <span>最终检查清单</span>
+            <button class="copy-button" type="button" data-copy-target="final-checklist">复制</button>
+          </div>
+          <pre aria-hidden="true">发布 AGENTS.md 前检查：
+
+- 是否写明项目类型和主要目录？
+- 是否写明真实可运行的安装、测试、构建命令？
+- 是否写明默认回复语言和文档语言？
+- 是否写明禁止改动无关文件和不得回退用户改动？
+- 是否写明数据库、密钥、删除、部署等高风险操作的确认规则？
+- 是否区分了 AGENTS.md 和 Codex Rules？
+- 是否没有过期命令、矛盾规则和空泛偏好？</pre>
+          <code id="final-checklist" data-copy-source>发布 AGENTS.md 前检查：
+
+- 是否写明项目类型和主要目录？
+- 是否写明真实可运行的安装、测试、构建命令？
+- 是否写明默认回复语言和文档语言？
+- 是否写明禁止改动无关文件和不得回退用户改动？
+- 是否写明数据库、密钥、删除、部署等高风险操作的确认规则？
+- 是否区分了 AGENTS.md 和 Codex Rules？
+- 是否没有过期命令、矛盾规则和空泛偏好？</code>
+        </div>
+        <div class="callout">
+          <strong>建议版本化</strong>
+          <p>把 `AGENTS.md` 提交进仓库，让规则变更接受 code review。团队规则应该像测试和 CI 一样可追溯。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const progressBar = document.querySelector("[data-progress-bar]");
+    const backTop = document.querySelector("[data-back-top]");
+    const tocLinks = Array.from(document.querySelectorAll("[data-toc] a"));
+    const sections = tocLinks
+      .map((link) => document.querySelector(link.getAttribute("href")))
+      .filter(Boolean);
+
+    function updateProgress() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+      progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      backTop.classList.toggle("visible", window.scrollY > 640);
+    }
+
+    function updateActiveSection() {
+      const marker = window.scrollY + window.innerHeight * 0.28;
+      let active = sections[0];
+      for (const section of sections) {
+        if (section.offsetTop <= marker) active = section;
+      }
+      tocLinks.forEach((link) => {
+        const isActive = link.getAttribute("href") === `#${active.id}`;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    }
+
+    let ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateProgress();
+        updateActiveSection();
+        ticking = false;
+      });
+    }
+
+    async function copyCanonicalText(button) {
+      const id = button.dataset.copyTarget;
+      const source = document.getElementById(id);
+      if (!source || !source.matches("[data-copy-source]")) {
+        button.textContent = "缺少来源";
+        return;
+      }
+      const original = button.textContent;
+      try {
+        await navigator.clipboard.writeText(source.textContent);
+        button.textContent = "已复制";
+      } catch {
+        button.textContent = "复制失败";
+      }
+      window.setTimeout(() => {
+        button.textContent = original;
+      }, 1400);
+    }
+
+    function startTypewriters() {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.querySelectorAll("[data-typewriter]").forEach((target) => {
+        const source = document.getElementById(target.dataset.typewriterSource);
+        const text = source ? source.textContent : "";
+        if (reduceMotion) {
+          target.textContent = text;
+          return;
+        }
+        let index = 0;
+        const step = () => {
+          target.textContent = text.slice(0, index);
+          index += 1;
+          if (index <= text.length) window.setTimeout(step, 18);
+        };
+        step();
+      });
+    }
+
+    document.querySelectorAll("[data-copy-target]").forEach((button) => {
+      button.addEventListener("click", () => copyCanonicalText(button));
+    });
+
+    backTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    updateProgress();
+    updateActiveSection();
+    startTypewriters();
+  </script>
+</body>
+</html>

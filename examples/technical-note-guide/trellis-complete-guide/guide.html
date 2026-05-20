@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="面向首次接触者的 Trellis + Codex 中文教程指南，覆盖安装、心智模型、完整实操、踩坑点和最佳实践。"
+    />
+    <title>Trellis 完全指南 | Codex 教程</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ===========================================
+         THEME
+         =========================================== */
+      :root {
+        --bg: #f7f4ee;
+        --bg-soft: #ece7dd;
+        --surface: rgba(255, 255, 255, 0.74);
+        --surface-strong: #fffdf8;
+        --ink: #1d1c19;
+        --muted: #686a70;
+        --faint: #9a958c;
+        --line: rgba(29, 28, 25, 0.1);
+        --line-strong: rgba(29, 28, 25, 0.18);
+        --blue: #246bfe;
+        --green: #2f8f66;
+        --amber: #b97026;
+        --red: #bd4b3e;
+        --shadow: 0 28px 80px rgba(53, 47, 38, 0.1);
+        --shadow-soft: 0 18px 52px rgba(53, 47, 38, 0.07);
+        --font-display: "Geist", "Noto Sans SC", sans-serif;
+        --font-body: "Geist", "Noto Sans SC", sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+        --page-pad: clamp(1rem, 3vw, 3rem);
+        --container: min(calc(100vw - (var(--page-pad) * 2)), 1420px);
+        --radius-xl: clamp(1.2rem, 2.2vw, 2rem);
+        --radius-lg: clamp(0.9rem, 1.6vw, 1.35rem);
+        --radius-md: clamp(0.65rem, 1vw, 0.95rem);
+        --h1: clamp(2.45rem, 5.6vw, 5.35rem);
+        --h2: clamp(1.7rem, 3vw, 2.95rem);
+        --h3: clamp(1.16rem, 1.65vw, 1.55rem);
+        --body: clamp(1rem, 1.06vw, 1.12rem);
+        --small: clamp(0.8rem, 0.88vw, 0.93rem);
+        --tiny: clamp(0.68rem, 0.76vw, 0.78rem);
+        --ease: cubic-bezier(0.19, 1, 0.22, 1);
+      }
+
+      /* ===========================================
+         BASE
+         =========================================== */
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        color: var(--ink);
+        background:
+          linear-gradient(90deg, rgba(29, 28, 25, 0.035) 1px, transparent 1px),
+          linear-gradient(rgba(29, 28, 25, 0.026) 1px, transparent 1px),
+          linear-gradient(180deg, #fffdf8 0%, var(--bg) 46%, #eee8dd 100%);
+        background-size: 4.5rem 4.5rem, 4.5rem 4.5rem, auto;
+        font-family: var(--font-body);
+        line-height: 1.65;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+        opacity: 0.18;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+        mix-blend-mode: multiply;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      code {
+        font-family: var(--font-mono);
+      }
+
+      ::selection {
+        background: rgba(36, 107, 254, 0.18);
+      }
+
+      /* ===========================================
+         PROGRESS AND TOP BAR
+         =========================================== */
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        z-index: 9;
+        background: transparent;
+      }
+
+      .progress span {
+        display: block;
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), var(--green));
+        transition: width 180ms var(--ease);
+      }
+
+      .topbar {
+        width: var(--container);
+        margin: 0 auto;
+        padding: clamp(1rem, 2.2vw, 2rem) 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        width: clamp(1.1rem, 2vw, 1.45rem);
+        aspect-ratio: 1;
+        border-radius: 0.42rem;
+        background:
+          linear-gradient(135deg, rgba(36, 107, 254, 0.92), rgba(47, 143, 102, 0.92)),
+          #fff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 22px rgba(36, 107, 254, 0.14);
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .chip,
+      .copy-btn,
+      .back-top {
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 253, 248, 0.76);
+        box-shadow: inset 0 0 0 1px var(--line), 0 8px 24px rgba(53, 47, 38, 0.05);
+        color: var(--muted);
+        font: 700 var(--tiny) / 1 var(--font-body);
+      }
+
+      .chip {
+        padding: 0.6rem 0.85rem;
+      }
+
+      .back-top {
+        position: fixed;
+        right: clamp(1rem, 2vw, 2rem);
+        bottom: clamp(1rem, 2vw, 2rem);
+        z-index: 8;
+        padding: 0.85rem 1rem;
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(0.5rem);
+        transition:
+          opacity 240ms var(--ease),
+          transform 240ms var(--ease);
+      }
+
+      .back-top.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      /* ===========================================
+         HERO
+         =========================================== */
+      .hero {
+        width: var(--container);
+        margin: 0 auto;
+        padding: clamp(3rem, 7vw, 7rem) 0 clamp(2rem, 5vw, 4.5rem);
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(18rem, 0.68fr);
+        gap: clamp(2rem, 6vw, 6rem);
+        align-items: center;
+      }
+
+      .hero-copy {
+        min-width: 0;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: clamp(1rem, 2vw, 1.6rem);
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(255, 253, 248, 0.8);
+        box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+        color: var(--muted);
+        font-size: var(--tiny);
+        font-weight: 800;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 0.52rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 0.32rem rgba(47, 143, 102, 0.12);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: var(--font-display);
+        letter-spacing: 0;
+        line-height: 1.05;
+      }
+
+      h1 {
+        max-width: 14ch;
+        font-size: var(--h1);
+        font-weight: 840;
+        text-wrap: balance;
+      }
+
+      h1 span {
+        color: var(--blue);
+      }
+
+      .hero p {
+        max-width: 62ch;
+        margin: clamp(1.2rem, 2.4vw, 1.9rem) 0 0;
+        color: var(--muted);
+        font-size: clamp(1.05rem, 1.4vw, 1.32rem);
+        line-height: 1.72;
+      }
+
+      .hero-panel {
+        min-width: 0;
+        border-radius: var(--radius-xl);
+        padding: clamp(0.55rem, 1vw, 0.75rem);
+        background:
+          linear-gradient(145deg, rgba(255, 253, 248, 0.95), rgba(236, 231, 221, 0.78));
+        box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      }
+
+      .lesson-device {
+        border-radius: calc(var(--radius-xl) - 0.45rem);
+        background: var(--surface-strong);
+        box-shadow: inset 0 0 0 1px var(--line);
+        padding: clamp(1.1rem, 2.2vw, 1.7rem);
+      }
+
+      .lesson-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        color: var(--faint);
+        font-size: var(--tiny);
+        font-weight: 800;
+      }
+
+      .lesson-title {
+        margin-top: clamp(1.2rem, 2.2vw, 1.8rem);
+        font-size: clamp(1.45rem, 2.6vw, 2.6rem);
+        font-weight: 800;
+        line-height: 1.08;
+      }
+
+      .lesson-list {
+        margin-top: clamp(1rem, 2vw, 1.6rem);
+        display: grid;
+        gap: 0.72rem;
+      }
+
+      .lesson-item {
+        display: flex;
+        align-items: center;
+        gap: 0.72rem;
+        padding: 0.78rem 0.9rem;
+        border-radius: 1rem;
+        background: rgba(247, 244, 238, 0.82);
+        box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08);
+        color: var(--muted);
+        font-size: var(--small);
+        font-weight: 750;
+      }
+
+      .lesson-dot {
+        width: 0.75rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--blue);
+      }
+
+      .lesson-item:nth-child(2) .lesson-dot {
+        background: var(--green);
+      }
+
+      .lesson-item:nth-child(3) .lesson-dot {
+        background: var(--amber);
+      }
+
+      /* ===========================================
+         LAYOUT
+         =========================================== */
+      .guide-shell {
+        width: var(--container);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+        gap: clamp(1.5rem, 4vw, 4.5rem);
+        align-items: start;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: clamp(1rem, 2vw, 2rem);
+        max-height: calc(100dvh - 2rem);
+        overflow: auto;
+        padding: clamp(0.8rem, 1.4vw, 1rem);
+        border-radius: var(--radius-lg);
+        background: rgba(255, 253, 248, 0.7);
+        box-shadow: inset 0 0 0 1px var(--line), 0 16px 45px rgba(53, 47, 38, 0.045);
+      }
+
+      .sidebar-label {
+        padding: 0.45rem 0.55rem 0.75rem;
+        color: var(--faint);
+        font-size: var(--tiny);
+        font-weight: 850;
+      }
+
+      .nav-list {
+        display: grid;
+        gap: 0.28rem;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 0.62rem 0.7rem;
+        border-radius: 0.8rem;
+        color: var(--muted);
+        font-size: var(--small);
+        font-weight: 760;
+        transition:
+          color 220ms var(--ease),
+          background 220ms var(--ease),
+          transform 220ms var(--ease);
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        color: var(--ink);
+        background: rgba(36, 107, 254, 0.09);
+      }
+
+      .main {
+        min-width: 0;
+        display: grid;
+        gap: clamp(1.2rem, 2.4vw, 2rem);
+        padding-bottom: clamp(4rem, 8vw, 8rem);
+      }
+
+      .guide-section {
+        min-width: 0;
+        scroll-margin-top: 2rem;
+        border-radius: var(--radius-xl);
+        padding: clamp(1.1rem, 2.8vw, 2.6rem);
+        background:
+          linear-gradient(180deg, rgba(255, 253, 248, 0.82), rgba(255, 253, 248, 0.64)),
+          var(--surface);
+        box-shadow: inset 0 0 0 1px var(--line), var(--shadow-soft);
+      }
+
+      .section-kicker {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: clamp(0.8rem, 1.8vw, 1.3rem);
+        color: var(--faint);
+        font-size: var(--tiny);
+        font-weight: 850;
+      }
+
+      .section-index {
+        color: var(--blue);
+        font-family: var(--font-mono);
+      }
+
+      h2 {
+        max-width: 18ch;
+        font-size: var(--h2);
+        font-weight: 840;
+        text-wrap: balance;
+      }
+
+      .section-lead {
+        max-width: 66ch;
+        margin: clamp(0.9rem, 1.7vw, 1.4rem) 0 0;
+        color: var(--muted);
+        font-size: var(--body);
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: clamp(0.7rem, 1.4vw, 1rem);
+        margin-top: clamp(1.1rem, 2vw, 1.8rem);
+      }
+
+      .content-grid.three {
+        grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.92fr) minmax(0, 0.92fr);
+      }
+
+      .card,
+      .callout,
+      .command-typewriter,
+      .timeline {
+        border-radius: var(--radius-lg);
+        background: var(--surface-strong);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .card {
+        min-width: 0;
+        padding: clamp(1rem, 1.7vw, 1.35rem);
+        border-top: 3px solid rgba(36, 107, 254, 0.52);
+        background: rgba(255, 253, 248, 0.86);
+      }
+
+      .card:nth-child(2) {
+        border-top-color: rgba(47, 143, 102, 0.52);
+      }
+
+      .card:nth-child(3),
+      .card:nth-child(4) {
+        border-top-color: rgba(185, 112, 38, 0.48);
+      }
+
+      .card h3 {
+        font-size: var(--h3);
+        font-weight: 820;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      .card p {
+        margin: 0.65rem 0 0;
+      }
+
+      .card ul {
+        margin: 0.75rem 0 0;
+        padding-left: 1.1rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        padding: 0.32rem 0.55rem;
+        border-radius: 0.7rem;
+        background: rgba(36, 107, 254, 0.1);
+        color: var(--blue);
+        font-size: var(--tiny);
+        font-weight: 850;
+      }
+
+      .badge.green {
+        background: rgba(47, 143, 102, 0.12);
+        color: var(--green);
+      }
+
+      .badge.orange {
+        background: rgba(185, 112, 38, 0.12);
+        color: var(--amber);
+      }
+
+      .callout {
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+        padding: clamp(1rem, 1.7vw, 1.35rem);
+        border-left: 4px solid var(--blue);
+        background: rgba(255, 253, 248, 0.9);
+      }
+
+      .callout.warning {
+        border-left-color: var(--amber);
+      }
+
+      .callout.danger {
+        border-left-color: var(--red);
+      }
+
+      .callout strong {
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+
+      .callout span,
+      .callout p {
+        margin: 0;
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      /* ===========================================
+         COMMAND TYPEWRITER AND FLOW
+         =========================================== */
+      .command-typewriter {
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+        overflow: hidden;
+        position: relative;
+        background:
+          linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(248, 245, 238, 0.98)),
+          var(--surface-strong);
+        box-shadow:
+          inset 0 0 0 1px rgba(29, 28, 25, 0.08),
+          0 18px 48px rgba(53, 47, 38, 0.065);
+      }
+
+      .command-typewriter::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, rgba(36, 107, 254, 0.055) 1px, transparent 1px),
+          linear-gradient(rgba(29, 28, 25, 0.024) 1px, transparent 1px);
+        background-size: 2.75rem 2.75rem;
+        mask-image: linear-gradient(180deg, black, transparent 82%);
+      }
+
+      .command-head {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: clamp(0.75rem, 1.4vw, 1rem) clamp(0.85rem, 1.6vw, 1.15rem);
+        border-bottom: 1px solid var(--line);
+        color: var(--faint);
+        font-size: var(--tiny);
+        font-weight: 850;
+      }
+
+      .command-title {
+        display: inline-flex;
+        align-items: center;
+        min-width: 0;
+        gap: 0.58rem;
+      }
+
+      .command-light {
+        width: 0.58rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 0.28rem rgba(47, 143, 102, 0.12);
+      }
+
+      .copy-btn {
+        padding: 0.44rem 0.68rem;
+        cursor: pointer;
+        transition:
+          color 180ms var(--ease),
+          transform 180ms var(--ease),
+          background 180ms var(--ease);
+      }
+
+      .copy-btn:hover {
+        color: var(--ink);
+        background: rgba(36, 107, 254, 0.08);
+      }
+
+      .copy-btn:active {
+        transform: scale(0.98);
+      }
+
+      .command-body {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: clamp(0.55rem, 1vw, 0.8rem);
+        margin: 0;
+        padding: clamp(1rem, 1.8vw, 1.35rem);
+        max-width: 100%;
+      }
+
+      .command-line {
+        --delay: 0ms;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.72rem;
+        align-items: start;
+        color: #282621;
+        font: 600 clamp(0.78rem, 0.95vw, 0.93rem) / 1.7 var(--font-mono);
+        opacity: 0;
+        transform: translateY(0.45rem);
+        animation: command-in 700ms var(--ease) forwards;
+        animation-delay: var(--delay);
+      }
+
+      .command-line::before {
+        content: ">";
+        color: var(--blue);
+        font-weight: 700;
+      }
+
+      .command-text {
+        min-width: 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .command-cursor {
+        display: inline-block;
+        width: 0.58em;
+        height: 1.1em;
+        margin-left: 0.18em;
+        vertical-align: -0.18em;
+        border-radius: 0.12em;
+        background: var(--blue);
+        animation: cursor-blink 1s steps(1) infinite;
+      }
+
+      .prompt-line::before {
+        color: var(--green);
+      }
+
+      .config-line::before {
+        color: var(--amber);
+      }
+
+      .command-typewriter code {
+        display: none;
+      }
+
+      @keyframes command-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes cursor-blink {
+        0%,
+        48% {
+          opacity: 1;
+        }
+        49%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .timeline {
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+        padding: clamp(0.35rem, 0.8vw, 0.65rem);
+        background: rgba(255, 253, 248, 0.86);
+      }
+
+      .timeline-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.85rem;
+        padding: clamp(0.85rem, 1.5vw, 1.15rem);
+        border-radius: var(--radius-md);
+        background: transparent;
+      }
+
+      .timeline-row + .timeline-row {
+        border-top: 1px solid var(--line);
+      }
+
+      .timeline-dot {
+        width: 1.55rem;
+        height: 1.55rem;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(36, 107, 254, 0.1);
+        color: var(--blue);
+        font: 800 var(--tiny) / 1 var(--font-mono);
+      }
+
+      .timeline-row strong {
+        display: block;
+      }
+
+      .timeline-row span:last-child {
+        display: block;
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      .checklist {
+        display: grid;
+        gap: 0.62rem;
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+      }
+
+      .check {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+        align-items: start;
+        padding: 0.9rem 1rem;
+        border-radius: var(--radius-md);
+        background: var(--surface-strong);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .check::before {
+        content: "";
+        width: 0.8rem;
+        aspect-ratio: 1;
+        margin-top: 0.42rem;
+        border-radius: 50%;
+        background: var(--green);
+      }
+
+      .check span {
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      .practice-cases {
+        display: grid;
+        gap: clamp(0.85rem, 1.7vw, 1.2rem);
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+      }
+
+      .practice-case {
+        display: grid;
+        grid-template-columns: minmax(7rem, 0.28fr) minmax(0, 1fr);
+        gap: clamp(0.85rem, 1.8vw, 1.35rem);
+        padding: clamp(1rem, 1.8vw, 1.45rem);
+        border-radius: var(--radius-lg);
+        background: rgba(255, 253, 248, 0.9);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .practice-case-label {
+        color: var(--blue);
+        font: 800 var(--tiny) / 1 var(--font-mono);
+      }
+
+      .practice-case h3 {
+        font-size: var(--h3);
+        font-weight: 830;
+      }
+
+      .case-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+        margin-top: 0.9rem;
+      }
+
+      .case-note {
+        min-width: 0;
+        padding: 0.85rem;
+        border-radius: var(--radius-md);
+        background: rgba(247, 244, 238, 0.78);
+        box-shadow: inset 0 0 0 1px rgba(29, 28, 25, 0.08);
+      }
+
+      .case-note strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: var(--tiny);
+      }
+
+      .case-note p,
+      .case-note li {
+        margin: 0;
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      .case-note ul {
+        margin: 0;
+        padding-left: 1.05rem;
+      }
+
+      .case-note.bad {
+        border-left: 3px solid var(--red);
+      }
+
+      .case-note.good {
+        border-left: 3px solid var(--green);
+      }
+
+      .case-note.wide {
+        grid-column: 1 / -1;
+      }
+
+      .prompt-lab {
+        display: grid;
+        gap: clamp(0.85rem, 1.7vw, 1.2rem);
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+      }
+
+      .prompt-template {
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        background:
+          linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(248, 245, 238, 0.98)),
+          var(--surface-strong);
+        box-shadow: inset 0 0 0 1px var(--line), 0 18px 48px rgba(53, 47, 38, 0.055);
+      }
+
+      .prompt-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: clamp(0.75rem, 1.4vw, 1rem) clamp(0.85rem, 1.6vw, 1.15rem);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .prompt-title {
+        color: var(--faint);
+        font-size: var(--tiny);
+        font-weight: 850;
+      }
+
+      .prompt-body {
+        margin: 0;
+        padding: clamp(1rem, 1.8vw, 1.35rem);
+        color: #282621;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font: 600 clamp(0.78rem, 0.95vw, 0.93rem) / 1.72 var(--font-mono);
+      }
+
+      .prompt-template code {
+        display: none;
+      }
+
+      .prompt-rules {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+      }
+
+      .prompt-rule {
+        padding: 0.85rem;
+        border-radius: var(--radius-md);
+        background: rgba(255, 253, 248, 0.9);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .prompt-rule strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+
+      .prompt-rule span {
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      .split-note {
+        display: grid;
+        grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+        gap: clamp(0.9rem, 2vw, 1.5rem);
+        align-items: start;
+        margin-top: clamp(1rem, 2vw, 1.5rem);
+      }
+
+      .quote-panel {
+        border-radius: var(--radius-xl);
+        padding: clamp(1.2rem, 2vw, 1.8rem);
+        background: linear-gradient(135deg, rgba(36, 107, 254, 0.1), rgba(47, 143, 102, 0.1)), var(--surface-strong);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .quote-panel p {
+        margin: 0;
+        font-size: clamp(1.3rem, 2.15vw, 2rem);
+        line-height: 1.35;
+        font-weight: 820;
+        text-wrap: balance;
+      }
+
+      .quote-panel span {
+        display: block;
+        margin-top: 0.8rem;
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      footer {
+        width: var(--container);
+        margin: 0 auto;
+        padding: clamp(2rem, 5vw, 4rem) 0;
+        color: var(--muted);
+        font-size: var(--small);
+      }
+
+      footer a {
+        color: var(--ink);
+        font-weight: 750;
+      }
+
+      /* ===========================================
+         RESPONSIVE
+         =========================================== */
+      @media (max-width: 980px) {
+        .hero,
+        .guide-shell,
+        .split-note {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+          max-height: none;
+        }
+
+        .nav-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .content-grid,
+        .content-grid.three,
+        .practice-case,
+        .case-grid,
+        .prompt-rules {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 620px) {
+        :root {
+          --page-pad: clamp(0.85rem, 4vw, 1rem);
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .top-actions {
+          flex-wrap: wrap;
+        }
+
+        .hero {
+          padding-top: 2rem;
+        }
+
+        .hero-panel {
+          display: block;
+        }
+
+        .nav-list {
+          grid-template-columns: 1fr;
+        }
+
+        .guide-section {
+          padding: 1rem;
+        }
+
+        pre {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+
+        .command-body {
+          padding: 0.9rem;
+        }
+
+        .section-kicker {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .practice-case {
+          padding: 0.95rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        .command-line {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+    <button class="back-top" id="backTop" type="button">回到顶部</button>
+
+    <header class="topbar" id="top">
+      <a class="brand" href="#top" aria-label="Trellis guide home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Trellis Guide</span>
+      </a>
+      <div class="top-actions">
+        <span class="chip">中文教程</span>
+        <span class="chip">Codex-first</span>
+        <span class="chip">Last checked 2026-05-18</span>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow">Trellis + Codex 学习路径</div>
+        <h1 id="hero-title">把 AI 编码从一次聊天，推进到仓库级工作流</h1>
+        <p>
+          这份指南面向第一次接触 Trellis 的 Codex 用户。你会先建立任务、规范、检查和记忆的心智模型，再完成安装、hook 配置、第一条任务和日常复用流程。
+        </p>
+      </div>
+
+      <aside class="hero-panel" aria-label="Guide summary">
+        <div class="lesson-device">
+          <div class="lesson-head"><span>Learning path</span><span>9 chapters</span></div>
+          <div class="lesson-title">先懂流程，再复制命令。</div>
+          <div class="lesson-list">
+            <div class="lesson-item"><span class="lesson-dot"></span><span>建立 tasks / spec / workspace 的边界</span></div>
+            <div class="lesson-item"><span class="lesson-dot"></span><span>配置 Codex hooks 和 Trellis 初始化</span></div>
+            <div class="lesson-item"><span class="lesson-dot"></span><span>跑完 PRD、实现、check、归档闭环</span></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="guide-shell">
+      <aside class="sidebar" aria-label="章节导航">
+        <div class="sidebar-label">目录</div>
+        <nav class="nav-list">
+          <a class="nav-link active" href="#overview">01 起点</a>
+          <a class="nav-link" href="#why">02 为什么</a>
+          <a class="nav-link" href="#model">03 心智模型</a>
+          <a class="nav-link" href="#codex">04 Codex 设置</a>
+          <a class="nav-link" href="#walkthrough">05 完整实操</a>
+          <a class="nav-link" href="#patterns">06 日常模式</a>
+          <a class="nav-link" href="#pitfalls">07 踩坑点</a>
+          <a class="nav-link" href="#best">08 最佳实践</a>
+          <a class="nav-link" href="#practice">09 练习计划</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <section class="guide-section" id="overview">
+          <div class="section-kicker"><span class="section-index">01</span><span>Overview</span></div>
+          <h2>先把 Trellis 看成流程层</h2>
+          <p class="section-lead">
+            Trellis 的核心价值不是“让模型更聪明”，而是让 AI 编码有稳定流程：先收敛任务，再读取规范，然后执行、检查、复盘和归档。
+          </p>
+          <div class="content-grid three">
+            <div class="card"><span class="badge">任务</span><h3>当前事实</h3><p>需求、PRD、验收标准、研究记录和本次任务上下文。</p></div>
+            <div class="card"><span class="badge green">规范</span><h3>复用规则</h3><p>架构约定、测试习惯、命名规则和团队长期记忆。</p></div>
+            <div class="card"><span class="badge orange">检查</span><h3>交付约束</h3><p>对照 PRD、spec、lint、type-check 和 test，减少跑偏。</p></div>
+          </div>
+        </section>
+
+        <section class="guide-section" id="why">
+          <div class="section-kicker"><span class="section-index">02</span><span>Why Trellis exists</span></div>
+          <h2>为什么单次聊天不够用</h2>
+          <p class="section-lead">
+            一次聊天可以解决单点问题，但真实项目会持续演进。缺少工作流时，模型很容易忘记规则、扩大范围、跳过验证，或者让你反复解释同一套上下文。
+          </p>
+          <div class="content-grid">
+            <div class="card">
+              <h3>没有 Trellis 时</h3>
+              <ul>
+                <li>任务边界只藏在聊天里。</li>
+                <li>项目规范每次都要重新解释。</li>
+                <li>检查依赖模型自觉。</li>
+                <li>经验很难沉淀到下一次任务。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>有 Trellis 后</h3>
+              <ul>
+                <li>任务上下文被写入 `.trellis/tasks/`。</li>
+                <li>可复用规则进入 `.trellis/spec/`。</li>
+                <li>实现后有 check 阶段对照要求。</li>
+                <li>完成后归档和 journal 形成记忆。</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>一句话判断</strong>
+            <span>如果任务跨多个文件、需要测试、需要记住团队约定，Trellis 才开始有明显收益。</span>
+          </div>
+        </section>
+
+        <section class="guide-section" id="model">
+          <div class="section-kicker"><span class="section-index">03</span><span>Mental model</span></div>
+          <h2>三个目录决定上下文边界</h2>
+          <p class="section-lead">
+            新手最容易混淆的是“任务事实”和“长期规范”。先记住这三层，后面的命令才有意义。
+          </p>
+          <div class="split-note">
+            <div class="quote-panel">
+              <p>当前任务放 tasks；长期规则放 spec；个人过程放 workspace。</p>
+              <span>这是整套指南最重要的心智模型。</span>
+            </div>
+            <div class="timeline">
+              <div class="timeline-row"><span class="timeline-dot">1</span><div><strong>.trellis/tasks/</strong><span>本次任务的 PRD、验收标准、研究记录和归档。</span></div></div>
+              <div class="timeline-row"><span class="timeline-dot">2</span><div><strong>.trellis/spec/</strong><span>未来任务会复用的项目规范和团队约定。</span></div></div>
+              <div class="timeline-row"><span class="timeline-dot">3</span><div><strong>.trellis/workspace/&lt;user&gt;/</strong><span>个人 journal、session 记忆和工作痕迹。</span></div></div>
+            </div>
+          </div>
+          <div class="callout warning">
+            <strong>常见误区</strong>
+            <span>不要把 `.trellis/spec/` 当作任务垃圾桶。只有未来会反复使用的规则才应该进入 spec。</span>
+          </div>
+        </section>
+
+        <section class="guide-section" id="codex">
+          <div class="section-kicker"><span class="section-index">04</span><span>Codex setup</span></div>
+          <h2>让 Codex 正确接入 Trellis</h2>
+          <p class="section-lead">
+            如果按稳定/latest 路线评估，使用 @mindfoldhq/trellis；如果跟随当前 beta 文档，命令可能是 @mindfoldhq/trellis@beta。演示前以实际安装版本和官方文档为准。
+          </p>
+          <div class="command-typewriter">
+            <div class="command-head">
+              <span class="command-title"><span class="command-light"></span><span>stable/latest path</span></span>
+              <button class="copy-btn" type="button">复制</button>
+            </div>
+            <div class="command-body">
+              <div class="command-line" style="--delay: 80ms"><span class="command-text">npm install -g @mindfoldhq/trellis</span></div>
+              <div class="command-line" style="--delay: 190ms"><span class="command-text">trellis init -u your-name --codex<span class="command-cursor"></span></span></div>
+            </div>
+            <code>npm install -g @mindfoldhq/trellis
+trellis init -u your-name --codex</code>
+          </div>
+          <div class="command-typewriter">
+            <div class="command-head">
+              <span class="command-title"><span class="command-light"></span><span>beta track shown in current docs</span></span>
+              <button class="copy-btn" type="button">复制</button>
+            </div>
+            <div class="command-body">
+              <div class="command-line" style="--delay: 80ms"><span class="command-text">npm install -g @mindfoldhq/trellis@beta</span></div>
+              <div class="command-line" style="--delay: 190ms"><span class="command-text">trellis init -u your-name --codex<span class="command-cursor"></span></span></div>
+            </div>
+            <code>npm install -g @mindfoldhq/trellis@beta
+trellis init -u your-name --codex</code>
+          </div>
+          <div class="content-grid">
+            <div class="card">
+              <span class="badge">前置条件</span>
+              <h3>Node.js 18+ 与 Python 3.9+</h3>
+              <p>先确认基础运行环境，再初始化项目。初始化后会出现 `.trellis/`、`.codex/`、`.agents/skills/` 和 `AGENTS.md` 等文件。</p>
+            </div>
+            <div class="card">
+              <span class="badge green">Codex hooks</span>
+              <h3>需要显式启用</h3>
+              <p>在 `~/.codex/config.toml` 打开 hooks。Codex 0.129+ 通常还需要在 Codex 中运行 `/hooks` 并批准 Trellis hook。</p>
+            </div>
+          </div>
+          <div class="command-typewriter">
+            <div class="command-head">
+              <span class="command-title"><span class="command-light"></span><span>~/.codex/config.toml</span></span>
+              <button class="copy-btn" type="button">复制</button>
+            </div>
+            <div class="command-body">
+              <div class="command-line config-line" style="--delay: 80ms"><span class="command-text">[features]</span></div>
+              <div class="command-line config-line" style="--delay: 190ms"><span class="command-text">hooks = true<span class="command-cursor"></span></span></div>
+            </div>
+            <code>[features]
+hooks = true</code>
+          </div>
+          <div class="callout">
+            <strong>第一次建议</strong>
+            <span>保持 `codex.dispatch_mode: inline` 默认路径。只有验证稳定后，再考虑旧式 sub-agent dispatch 或更复杂自定义。</span>
+          </div>
+        </section>
+
+        <section class="guide-section" id="walkthrough">
+          <div class="section-kicker"><span class="section-index">05</span><span>Complete walkthrough</span></div>
+          <h2>从第一条任务跑完整闭环</h2>
+          <p class="section-lead">
+            第一次任务不要选迁移、重构或跨系统改造。用一个能在一轮里闭环的小功能观察 Trellis 的文件、PRD、check 和归档行为。
+          </p>
+          <div class="timeline">
+            <div class="timeline-row"><span class="timeline-dot">1</span><div><strong>初始化 demo 仓库</strong><span>先看清 Trellis 写入了哪些目录和平台配置。</span></div></div>
+            <div class="timeline-row"><span class="timeline-dot">2</span><div><strong>描述任务</strong><span>例如：添加一个 settings 页面，包含校验和测试。</span></div></div>
+            <div class="timeline-row"><span class="timeline-dot">3</span><div><strong>审阅 PRD</strong><span>确认验收标准、范围外事项和测试要求。</span></div></div>
+            <div class="timeline-row"><span class="timeline-dot">4</span><div><strong>实现并检查</strong><span>让 Codex 按上下文实现，再跑 Trellis check。</span></div></div>
+            <div class="timeline-row"><span class="timeline-dot">5</span><div><strong>沉淀 spec</strong><span>只有可复用经验才写入 `.trellis/spec/`。</span></div></div>
+            <div class="timeline-row"><span class="timeline-dot">6</span><div><strong>最后 finish-work</strong><span>代码工作完成并经过提交/审查后，再做归档和 journal。</span></div></div>
+          </div>
+          <div class="command-typewriter">
+            <div class="command-head">
+              <span class="command-title"><span class="command-light"></span><span>first task prompt</span></span>
+              <button class="copy-btn" type="button">复制</button>
+            </div>
+            <div class="command-body">
+              <div class="command-line prompt-line" style="--delay: 80ms"><span class="command-text">使用 Trellis 帮我规划并实现一个小功能：</span></div>
+              <div class="command-line prompt-line" style="--delay: 190ms"><span class="command-text">在 demo 应用中添加 Settings 页面，包含用户名和通知开关。</span></div>
+              <div class="command-line prompt-line" style="--delay: 300ms"><span class="command-text">要求：有输入校验、有基础测试、不要修改认证模块。</span></div>
+              <div class="command-line prompt-line" style="--delay: 410ms"><span class="command-text">先产出 PRD 和验收标准，等我确认后再实现。<span class="command-cursor"></span></span></div>
+            </div>
+            <code>使用 Trellis 帮我规划并实现一个小功能：
+在 demo 应用中添加 Settings 页面，包含用户名和通知开关。
+要求：有输入校验、有基础测试、不要修改认证模块。
+先产出 PRD 和验收标准，等我确认后再实现。</code>
+          </div>
+        </section>
+
+        <section class="guide-section" id="patterns">
+          <div class="section-kicker"><span class="section-index">06</span><span>Everyday patterns</span></div>
+          <h2>把日常任务放进固定模式</h2>
+          <p class="section-lead">
+            Trellis 能让 Codex 更稳，但前提是任务输入清楚。这里的目标不是写长 prompt，而是明确目标、范围、验收标准和禁止事项。
+          </p>
+          <div class="content-grid three">
+            <div class="card">
+              <span class="badge">Feature</span>
+              <h3>功能任务</h3>
+              <p>说明用户价值、涉及模块、验收标准、测试要求和明确的 out of scope。</p>
+            </div>
+            <div class="card">
+              <span class="badge orange">Bugfix</span>
+              <h3>修复任务</h3>
+              <p>先复现，再最小化，再修复。复杂 bug 修完后用 break-loop 复盘。</p>
+            </div>
+            <div class="card">
+              <span class="badge green">Research</span>
+              <h3>纯调研任务</h3>
+              <p>明确“只读不改代码”，输出发现、风险、建议和后续任务拆分。</p>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>控制范围的关键词</strong>
+            <span>“先写 PRD 等我确认”“只调研不写代码”“不要修改 X 模块”“验收标准必须包含测试”。这些比泛泛说“仔细一点”有效。</span>
+          </div>
+        </section>
+
+        <section class="guide-section" id="pitfalls">
+          <div class="section-kicker"><span class="section-index">07</span><span>Pitfalls</span></div>
+          <h2>这些坑会让流程失真</h2>
+          <div class="content-grid">
+            <div class="card">
+              <span class="badge orange">Hook</span>
+              <h3>忘记批准 hooks</h3>
+              <p>Codex hook 批准会影响自动上下文注入。先确认 `hooks = true` 和 `/hooks` 批准 Trellis hook 的状态。</p>
+            </div>
+            <div class="card">
+              <span class="badge orange">Spec</span>
+              <h3>把 spec 写成流水账</h3>
+              <p>spec 应该是未来会复用的规则，不是本次任务的过程记录。</p>
+            </div>
+            <div class="card">
+              <span class="badge orange">Dispatch</span>
+              <h3>过早切 sub-agent</h3>
+              <p>第一次先用 inline。上下文传递稳定后，再评估其他 dispatch 模式。</p>
+            </div>
+            <div class="card">
+              <span class="badge orange">Finish</span>
+              <h3>finish-work 时机太早</h3>
+              <p>finish/archive 不是代码审查或 commit 的替代品。先完成代码、测试、审查和提交，再归档。</p>
+            </div>
+          </div>
+          <div class="callout danger">
+            <strong>重要仓库前先看 auto-commit</strong>
+            <span>理解 `session_auto_commit` 的行为。如果不希望自动 journal/archive 提交，先按项目策略关闭或调整。</span>
+          </div>
+        </section>
+
+        <section class="guide-section" id="best">
+          <div class="section-kicker"><span class="section-index">08</span><span>Best practices</span></div>
+          <h2>让团队记忆变得可复用</h2>
+          <p class="section-lead">
+            最佳实践不是口号。下面是一组最佳实践案例库：每个案例都给出场景、反例、推荐做法和交付物，方便你直接照着跑
