@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend Slides x Design Taste 技术分享</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ===========================================
+         CSS CUSTOM PROPERTIES: STYLE A / BOLD SIGNAL
+         Business-friendly high-impact theme with one strong accent.
+         =========================================== */
+      :root {
+        --bg-primary: #101214;
+        --bg-secondary: #1b1d1e;
+        --surface: #151719;
+        --surface-raised: #20211f;
+        --card-bg: #d86c42;
+        --card-bg-deep: #9f4a31;
+        --card-bg-soft: rgba(216, 108, 66, 0.14);
+        --paper: #f4ecdf;
+        --paper-muted: rgba(244, 236, 223, 0.72);
+        --paper-faint: rgba(244, 236, 223, 0.48);
+        --ink: #151719;
+        --ink-muted: rgba(21, 23, 25, 0.68);
+        --line: rgba(244, 236, 223, 0.14);
+        --line-strong: rgba(244, 236, 223, 0.24);
+        --line-dark: rgba(21, 23, 25, 0.16);
+        --shadow-deep: 0 1.6rem 4rem rgba(5, 8, 10, 0.34);
+        --shadow-soft: 0 1rem 2.6rem rgba(7, 10, 12, 0.2);
+        --inner-highlight: inset 0 1px 0 rgba(244, 236, 223, 0.12);
+        --radius-lg: clamp(1rem, 1.8vw, 1.65rem);
+        --radius-md: clamp(0.72rem, 1.25vw, 1.1rem);
+        --font-display: "Archivo Black", "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
+        --font-body: "Plus Jakarta Sans", "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
+        --font-mono: "IBM Plex Mono", "Microsoft YaHei UI", "Noto Sans SC", monospace;
+        --subtitle-size: clamp(0.82rem, 1.35vw, 1.08rem);
+        --caption-size: clamp(0.62rem, 0.82vw, 0.76rem);
+        --ease-out-expo: cubic-bezier(0.32, 0.72, 0, 1);
+        --duration-normal: 0.78s;
+      }
+
+      /* ===========================================
+         BASE RESET
+         Keep the presentation predictable across browsers.
+         =========================================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        color: var(--paper);
+        background: var(--bg-primary);
+        font-family: var(--font-body);
+        font-synthesis: none;
+      }
+
+      /* ===========================================
+         VIEWPORT FITTING: MANDATORY BASE STYLES
+         Include this ENTIRE file in every presentation.
+         These styles ensure slides fit exactly in the viewport.
+         =========================================== */
+
+      /* 1. Lock html/body to viewport */
+      html,
+      body {
+        height: 100%;
+        overflow-x: hidden;
+      }
+
+      html {
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+      }
+
+      /* 2. Each slide = exact viewport height */
+      .slide {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        overflow: hidden; /* CRITICAL: Prevent ANY overflow */
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* 3. Content container with flex for centering */
+      .slide-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-height: 100%;
+        overflow: hidden; /* Double-protection against overflow */
+        padding: var(--slide-padding);
+      }
+
+      /* 4. ALL typography uses clamp() for responsive scaling */
+      :root {
+        /* Titles scale from mobile to desktop */
+        --title-size: clamp(1.5rem, 5vw, 4rem);
+        --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+        --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+
+        /* Body text */
+        --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+        --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+        /* Spacing scales with viewport */
+        --slide-padding: clamp(1rem, 4vw, 4rem);
+        --content-gap: clamp(0.5rem, 2vw, 2rem);
+        --element-gap: clamp(0.25rem, 1vw, 1rem);
+      }
+
+      /* 5. Cards/containers use viewport-relative max sizes */
+      .card,
+      .container,
+      .content-box {
+        max-width: min(90vw, 1000px);
+        max-height: min(80vh, 700px);
+      }
+
+      /* 6. Lists auto-scale with viewport */
+      .feature-list,
+      .bullet-list {
+        gap: clamp(0.4rem, 1vh, 1rem);
+      }
+
+      .feature-list li,
+      .bullet-list li {
+        font-size: var(--body-size);
+        line-height: 1.4;
+      }
+
+      /* 7. Grids adapt to available space */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+        gap: clamp(0.5rem, 1.5vw, 1rem);
+      }
+
+      /* 8. Images constrained to viewport */
+      img,
+      .image-container {
+        max-width: 100%;
+        max-height: min(50vh, 400px);
+        object-fit: contain;
+      }
+
+      /* ===========================================
+         RESPONSIVE BREAKPOINTS
+         Aggressive scaling for smaller viewports
+         =========================================== */
+
+      /* Short viewports (< 700px height) */
+      @media (max-height: 700px) {
+        :root {
+          --slide-padding: clamp(0.75rem, 3vw, 2rem);
+          --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+          --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+          --h2-size: clamp(1rem, 3vw, 1.75rem);
+        }
+      }
+
+      /* Very short viewports (< 600px height) */
+      @media (max-height: 600px) {
+        :root {
+          --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+          --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+          --title-size: clamp(1.1rem, 4vw, 2rem);
+          --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+        }
+
+        /* Hide non-essential elements */
+        .nav-dots,
+        .keyboard-hint,
+        .decorative {
+          display: none;
+        }
+      }
+
+      /* Extremely short (landscape phones, < 500px height) */
+      @media (max-height: 500px) {
+        :root {
+          --slide-padding: clamp(0.4rem, 2vw, 1rem);
+          --title-size: clamp(1rem, 3.5vw, 1.5rem);
+          --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+          --body-size: clamp(0.65rem, 1vw, 0.85rem);
+        }
+      }
+
+      /* Narrow viewports (< 600px width) */
+      @media (max-width: 600px) {
+        :root {
+          --title-size: clamp(1.25rem, 7vw, 2.5rem);
+        }
+
+        /* Stack grids vertically */
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ===========================================
+         REDUCED MOTION
+         Respect user preferences
+         =========================================== */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.2s !important;
+        }
+
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      /* ===========================================
+         GLOBAL PRESENTATION SURFACE
+         Bold Signal structure: dark grid, orange plates, precise labels.
+         =========================================== */
+      .slide {
+        background:
+          radial-gradient(circle at 78% 18%, rgba(216, 108, 66, 0.2), transparent 31%),
+          radial-gradient(circle at 10% 88%, rgba(244, 236, 223, 0.07), transparent 27%),
+          linear-gradient(90deg, rgba(244, 236, 223, 0.055) 1px, transparent 1px),
+          linear-gradient(rgba(244, 236, 223, 0.045) 1px, transparent 1px),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent 42%),
+          var(--bg-primary);
+        background-size: auto, auto, clamp(2.8rem, 7vw, 5.6rem) clamp(2.8rem, 7vw, 5.6rem), clamp(2.8rem, 7vw, 5.6rem) clamp(2.8rem, 7vw, 5.6rem), auto, auto;
+      }
+
+      .slide::before {
+        content: attr(data-page);
+        position: absolute;
+        top: clamp(0.9rem, 2vw, 1.8rem);
+        left: clamp(1rem, 2vw, 1.8rem);
+        color: rgba(244, 236, 223, 0.075);
+        font-family: var(--font-display);
+        font-size: clamp(3.2rem, 11vw, 10rem);
+        line-height: 0.75;
+        pointer-events: none;
+      }
+
+      .slide::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          repeating-linear-gradient(0deg, rgba(244, 236, 223, 0.022) 0 1px, transparent 1px 3px),
+          radial-gradient(circle at 50% 50%, transparent 0, rgba(5, 8, 10, 0.18) 100%);
+        mix-blend-mode: soft-light;
+        opacity: 0.72;
+      }
+
+      .slide-content {
+        position: relative;
+        z-index: 2;
+        gap: var(--content-gap);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        letter-spacing: 0;
+        text-wrap: balance;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+      }
+
+      h1 {
+        max-width: min(84vw, 1120px);
+        font-size: clamp(2.05rem, 5.8vw, 5.6rem);
+        line-height: 1.08;
+      }
+
+      h2 {
+        max-width: min(82vw, 960px);
+        font-size: clamp(1.55rem, 3.95vw, 3.75rem);
+        line-height: 1.12;
+      }
+
+      h3 {
+        font-size: clamp(0.96rem, 1.7vw, 1.45rem);
+        line-height: 1.18;
+      }
+
+      h1 + .lead,
+      h2 + .lead,
+      h2 + .small-note,
+      .quote + .lead {
+        margin-top: clamp(0.9rem, 2.2vh, 1.8rem);
+      }
+
+      h2 + .compare-board,
+      h2 + .input-board,
+      h2 + .metric-strip,
+      h2 + .timeline,
+      h2 + .rule-board,
+      h2 + .risk-board,
+      h2 + .grid-2,
+      h2 + .grid-4,
+      h2 + .grid-asym {
+        margin-top: clamp(1.1rem, 3vh, 2.4rem);
+      }
+
+      .kicker + h1,
+      .kicker + h2 {
+        margin-top: clamp(0.45rem, 1.2vh, 0.9rem);
+      }
+
+      .lead + .ribbon,
+      .small-note + .ribbon {
+        margin-top: clamp(0.8rem, 1.8vh, 1.4rem);
+      }
+
+      .kicker {
+        width: fit-content;
+        border: 1px solid rgba(216, 108, 66, 0.3);
+        border-radius: 999px;
+        background: rgba(216, 108, 66, 0.08);
+        box-shadow: var(--inner-highlight);
+        color: #f0a07d;
+        font-size: var(--caption-size);
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        padding: clamp(0.3rem, 0.65vw, 0.48rem) clamp(0.5rem, 1vw, 0.78rem);
+        text-transform: uppercase;
+      }
+
+      .lead {
+        max-width: min(70vw, 760px);
+        color: var(--paper-muted);
+        font-size: var(--subtitle-size);
+        line-height: 1.78;
+      }
+
+      .small-note {
+        max-width: min(72vw, 780px);
+        color: var(--paper-faint);
+        font-size: var(--small-size);
+        line-height: 1.72;
+      }
+
+      .split-layout .lead,
+      .split-layout .small-note,
+      .title-layout .lead,
+      .closing-layout .lead {
+        max-width: min(58vw, 680px);
+      }
+
+      .reveal,
+      .reveal-left,
+      .reveal-scale {
+        opacity: 0;
+        transition:
+          opacity var(--duration-normal) var(--ease-out-expo),
+          transform var(--duration-normal) var(--ease-out-expo),
+          filter var(--duration-normal) var(--ease-out-expo);
+      }
+
+      .reveal {
+        transform: translateY(clamp(0.8rem, 3vh, 1.8rem));
+        filter: blur(8px);
+      }
+
+      .reveal-left {
+        transform: translateX(calc(-1 * clamp(1rem, 3vw, 2.6rem)));
+        filter: blur(8px);
+      }
+
+      .reveal-scale {
+        transform: scale(0.94);
+        filter: blur(8px);
+      }
+
+      .slide.visible .reveal,
+      .slide.visible .reveal-left,
+      .slide.visible .reveal-scale {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+        filter: blur(0);
+      }
+
+      .slide.visible .reveal:nth-child(1),
+      .slide.visible .reveal-left:nth-child(1),
+      .slide.visible .reveal-scale:nth-child(1) {
+        transition-delay: 0.06s;
+      }
+
+      .slide.visible .reveal:nth-child(2),
+      .slide.visible .reveal-left:nth-child(2),
+      .slide.visible .reveal-scale:nth-child(2) {
+        transition-delay: 0.14s;
+      }
+
+      .slide.visible .reveal:nth-child(3),
+      .slide.visible .reveal-left:nth-child(3),
+      .slide.visible .reveal-scale:nth-child(3) {
+        transition-delay: 0.22s;
+      }
+
+      .slide.visible .reveal:nth-child(4),
+      .slide.visible .reveal-left:nth-child(4),
+      .slide.visible .reveal-scale:nth-child(4) {
+        transition-delay: 0.3s;
+      }
+
+      .title-layout,
+      .split-layout,
+      .wide-layout,
+      .closing-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.18fr) minmax(14rem, 0.82fr);
+        gap: clamp(1rem, 4vw, 4rem);
+        align-items: end;
+        max-height: min(78vh, 720px);
+      }
+
+      .title-layout {
+        align-items: center;
+      }
+
+      .orange-plate {
+        min-height: clamp(11rem, 38vh, 25rem);
+        border: 1px solid rgba(244, 236, 223, 0.16);
+        border-radius: var(--radius-lg);
+        background:
+          linear-gradient(135deg, rgba(244, 236, 223, 0.16), transparent 26%),
+          linear-gradient(135deg, #dc754f, var(--card-bg-deep));
+        color: var(--ink);
+        padding: clamp(1rem, 2.2vw, 2rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow:
+          var(--shadow-deep),
+          inset 0 1px 0 rgba(255, 255, 255, 0.22),
+          inset 0 -1px 0 rgba(21, 23, 25, 0.18);
+        transform: rotate(-2deg);
+        transition:
+          transform 0.7s var(--ease-out-expo),
+          box-shadow 0.7s var(--ease-out-expo);
+      }
+
+      .slide.visible .orange-plate {
+        transform: rotate(-2deg) translateY(0);
+      }
+
+      .orange-plate .tag {
+        font-size: var(--caption-size);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .orange-plate strong {
+        font-family: var(--font-display);
+        font-size: clamp(2.35rem, 7.2vw, 7rem);
+        line-height: 0.95;
+      }
+
+      .caption-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.075), rgba(244, 236, 223, 0.035));
+        box-shadow: var(--inner-highlight), var(--shadow-soft);
+        padding: clamp(0.85rem, 1.8vw, 1.45rem);
+      }
+
+      .caption-card.light {
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent),
+          var(--paper);
+        border-color: var(--line-dark);
+      }
+
+      .caption-card h3 {
+        margin-bottom: clamp(0.45rem, 1vh, 0.75rem);
+      }
+
+      .caption-card p,
+      .caption-card li {
+        color: inherit;
+        font-size: var(--small-size);
+        line-height: 1.7;
+      }
+
+      .caption-card:not(.light) p,
+      .caption-card:not(.light) li {
+        color: var(--paper-muted);
+      }
+
+      .compare-board {
+        display: grid;
+        grid-template-columns: 0.78fr 1.22fr;
+        gap: clamp(0.8rem, 2vw, 1.6rem);
+        max-height: min(56vh, 500px);
+      }
+
+      .compare-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.06), rgba(244, 236, 223, 0.025));
+        box-shadow: var(--inner-highlight);
+        padding: clamp(0.85rem, 1.65vw, 1.35rem);
+      }
+
+      .compare-column.light {
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0)),
+          var(--paper);
+        border-color: rgba(255, 255, 255, 0.42);
+        box-shadow:
+          var(--shadow-soft),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        padding: clamp(1rem, 2vw, 1.6rem);
+      }
+
+      .compare-column p,
+      .compare-column li {
+        color: inherit;
+        font-size: var(--small-size);
+        line-height: 1.68;
+      }
+
+      .compare-column:not(.light) li,
+      .compare-column:not(.light) p {
+        color: var(--paper-muted);
+      }
+
+      .input-board {
+        display: grid;
+        grid-template-columns: 1.08fr 1fr 1fr;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+          "hero purpose audience"
+          "hero pages edit";
+        gap: clamp(0.8rem, 1.8vw, 1.4rem);
+        align-items: stretch;
+        max-height: min(56vh, 500px);
+      }
+
+      .input-cell {
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.055), rgba(244, 236, 223, 0.02));
+        box-shadow: var(--inner-highlight);
+        padding: clamp(0.8rem, 1.45vw, 1.15rem);
+        min-width: 0;
+      }
+
+      .input-cell.hero {
+        grid-area: hero;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)),
+          var(--paper);
+        border-color: rgba(255, 255, 255, 0.42);
+        box-shadow:
+          var(--shadow-soft),
+          inset 0 1px 0 rgba(255, 255, 255, 0.48);
+        padding: clamp(1rem, 2vw, 1.65rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .input-cell:nth-child(2) {
+        grid-area: purpose;
+      }
+
+      .input-cell:nth-child(3) {
+        grid-area: audience;
+      }
+
+      .input-cell:nth-child(4) {
+        grid-area: pages;
+      }
+
+      .input-cell:nth-child(5) {
+        grid-area: edit;
+      }
+
+      .input-cell span {
+        display: block;
+        margin-bottom: clamp(0.45rem, 1vh, 0.7rem);
+        color: var(--card-bg);
+        font-size: var(--caption-size);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .input-cell.hero span {
+        color: var(--ink-muted);
+      }
+
+      .input-cell p {
+        color: var(--paper-muted);
+        font-size: var(--small-size);
+        line-height: 1.68;
+      }
+
+      .input-cell.hero p {
+        color: var(--ink-muted);
+      }
+
+      .input-cell.hero strong {
+        font-family: var(--font-display);
+        font-size: clamp(2.3rem, 6.6vw, 6.2rem);
+        line-height: 0.96;
+      }
+
+      .metric-strip {
+        display: grid;
+        grid-template-columns: 0.82fr 1.04fr 1.14fr;
+        gap: clamp(0.75rem, 1.8vw, 1.4rem);
+        align-items: stretch;
+        max-height: min(54vh, 480px);
+      }
+
+      .metric-main {
+        color: var(--ink);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-lg);
+        background:
+          linear-gradient(135deg, rgba(244, 236, 223, 0.14), transparent 32%),
+          linear-gradient(135deg, #dd7954, var(--card-bg-deep));
+        box-shadow:
+          var(--shadow-deep),
+          inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        padding: clamp(1rem, 2.2vw, 1.8rem);
+        min-height: clamp(9rem, 29vh, 18rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transform: rotate(-1.2deg);
+        transform-origin: center;
+      }
+
+      .metric-main strong {
+        font-family: var(--font-display);
+        font-size: clamp(3rem, 8.6vw, 7.4rem);
+        line-height: 0.82;
+      }
+
+      .metric-side {
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.055), rgba(244, 236, 223, 0.02));
+        box-shadow: var(--inner-highlight);
+        padding: clamp(0.82rem, 1.45vw, 1.2rem);
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .metric-side p {
+        color: var(--paper-muted);
+        font-size: var(--small-size);
+        line-height: 1.68;
+      }
+
+      .metric-side h3 + p {
+        margin-top: clamp(0.45rem, 1vh, 0.75rem);
+      }
+
+      .metric-side p + h3 {
+        margin-top: clamp(0.9rem, 2.4vh, 1.6rem);
+      }
+
+      .rule-board {
+        display: grid;
+        grid-template-columns: 1.4fr 0.9fr;
+        gap: clamp(0.8rem, 2vw, 1.6rem);
+        max-height: min(58vh, 500px);
+      }
+
+      .rule-list {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background: rgba(244, 236, 223, 0.035);
+        box-shadow: var(--inner-highlight);
+      }
+
+      .rule-row {
+        display: grid;
+        grid-template-columns: clamp(4.5rem, 9vw, 7.5rem) 1fr;
+        gap: clamp(0.7rem, 1.4vw, 1rem);
+        padding: clamp(0.65rem, 1.25vw, 0.95rem) clamp(0.8rem, 1.5vw, 1.1rem);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .rule-row strong {
+        color: var(--card-bg);
+        font-size: var(--caption-size);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .rule-row span {
+        color: var(--paper-muted);
+        font-size: var(--small-size);
+        line-height: 1.62;
+      }
+
+      .risk-board {
+        display: grid;
+        grid-template-columns: 1fr 0.72fr;
+        gap: clamp(0.8rem, 2vw, 1.6rem);
+        max-height: min(58vh, 500px);
+      }
+
+      .risk-major {
+        color: var(--ink);
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        border-radius: var(--radius-lg);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)),
+          var(--paper);
+        box-shadow:
+          var(--shadow-soft),
+          inset 0 1px 0 rgba(255, 255, 255, 0.48);
+        padding: clamp(1rem, 2.2vw, 1.8rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .risk-major p,
+      .risk-minor p {
+        font-size: var(--small-size);
+        line-height: 1.7;
+      }
+
+      .risk-minor {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.7rem, 1.4vw, 1rem);
+      }
+
+      .risk-minor article {
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.055), rgba(244, 236, 223, 0.02));
+        box-shadow: var(--inner-highlight);
+        padding: clamp(0.78rem, 1.3vw, 1rem);
+      }
+
+      .risk-minor p {
+        color: var(--paper-muted);
+      }
+
+      .accent-rail {
+        position: relative;
+        padding-left: clamp(1rem, 2.2vw, 1.8rem);
+      }
+
+      .accent-rail::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: clamp(0.22rem, 0.45vw, 0.38rem);
+        background: var(--card-bg);
+      }
+
+      .grid-2,
+      .grid-4,
+      .grid-asym,
+      .timeline,
+      .checklist {
+        display: grid;
+        gap: clamp(0.65rem, 1.4vw, 1.15rem);
+        max-height: min(58vh, 510px);
+      }
+
+      .grid-2 {
+        grid-template-columns: 0.92fr 1.08fr;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .grid-asym {
+        grid-template-columns: 1.35fr 0.8fr;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-asym .tall {
+        grid-row: span 2;
+      }
+
+      .bullet-list,
+      .feature-list {
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .bullet-list li,
+      .feature-list li {
+        position: relative;
+        padding-left: clamp(1rem, 1.8vw, 1.45rem);
+      }
+
+      .bullet-list li::before,
+      .feature-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: clamp(0.34rem, 0.55vw, 0.44rem);
+        height: clamp(0.34rem, 0.55vw, 0.44rem);
+        background: var(--card-bg);
+        transform: rotate(45deg);
+      }
+
+      .timeline {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .step {
+        border: 1px solid rgba(244, 236, 223, 0.11);
+        border-radius: var(--radius-md);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.055), rgba(244, 236, 223, 0.02));
+        box-shadow: var(--inner-highlight);
+        padding: clamp(0.78rem, 1.35vw, 1.12rem);
+      }
+
+      .step span {
+        display: block;
+        margin-bottom: clamp(0.5rem, 1vh, 0.75rem);
+        color: var(--card-bg);
+        font-size: var(--caption-size);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .code-card {
+        overflow: hidden;
+        border: 1px solid rgba(244, 236, 223, 0.12);
+        border-radius: var(--radius-lg);
+        background:
+          linear-gradient(180deg, rgba(244, 236, 223, 0.055), rgba(244, 236, 223, 0.018)),
+          #0d0f10;
+        box-shadow: var(--shadow-deep), var(--inner-highlight);
+        max-height: min(52vh, 440px);
+      }
+
+      .code-card header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        padding: clamp(0.45rem, 0.9vw, 0.7rem) clamp(0.8rem, 1.5vw, 1.15rem);
+        color: var(--paper-muted);
+        font-size: var(--caption-size);
+        font-weight: 700;
+      }
+
+      pre {
+        margin: 0;
+        padding: clamp(0.8rem, 1.6vw, 1.3rem);
+        color: var(--paper);
+        font-family: var(--font-mono);
+        font-size: clamp(0.66rem, 1vw, 0.9rem);
+        line-height: 1.64;
+        white-space: pre-wrap;
+      }
+
+      .quote {
+        max-width: min(76vw, 920px);
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 4.6vw, 4.35rem);
+        line-height: 1.12;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+      }
+
+      .ribbon {
+        display: flex;
+        gap: clamp(0.45rem, 1vw, 0.75rem);
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        border: 1px solid rgba(244, 236, 223, 0.22);
+        border-radius: 999px;
+        background: rgba(244, 236, 223, 0.045);
+        box-shadow: var(--inner-highlight);
+        color: var(--paper);
+        padding: clamp(0.35rem, 0.8vw, 0.55rem) clamp(0.6rem, 1.2vw, 0.9rem);
+        font-size: var(--caption-size);
+        font-weight: 700;
+      }
+
+      .pill.dark {
+        border-color: rgba(23, 23, 23, 0.22);
+        color: var(--ink);
+      }
+
+      .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: clamp(0.16rem, 0.35vh, 0.24rem);
+        background: linear-gradient(90deg, #f0a07d, var(--card-bg));
+        z-index: 20;
+        transition: width 0.2s var(--ease-out-expo);
+      }
+
+      .nav-dots {
+        position: fixed;
+        right: clamp(0.55rem, 1.2vw, 0.95rem);
+        top: 50%;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.28rem, 0.62vw, 0.5rem);
+        transform: translateY(-50%);
+        z-index: 18;
+      }
+
+      .nav-dot {
+        width: clamp(0.42rem, 0.66vw, 0.58rem);
+        height: clamp(0.42rem, 0.66vw, 0.58rem);
+        padding: 0;
+        border: 1px solid rgba(244, 236, 223, 0.42);
+        border-radius: 999px;
+        background: rgba(244, 236, 223, 0.08);
+        cursor: pointer;
+        transition:
+          transform 0.28s var(--ease-out-expo),
+          background 0.28s var(--ease-out-expo),
+          border-color 0.28s var(--ease-out-expo);
+      }
+
+      .nav-dot.active {
+        background: var(--card-bg);
+        border-color: rgba(244, 236, 223, 0.78);
+        transform: scale(1.25);
+      }
+
+      .keyboard-hint {
+        position: fixed;
+        left: clamp(1rem, 2vw, 1.8rem);
+        bottom: clamp(0.9rem, 2vw, 1.6rem);
+        color: rgba(246, 239, 230, 0.45);
+        font-size: var(--caption-size);
+        font-weight: 700;
+        z-index: 18;
+      }
+
+      /* ===========================================
+         INLINE EDITING UI
+         JS controls visibility; export strips edit state before saving.
+         =========================================== */
+      .edit-hotzone {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 80px;
+        height: 80px;
+        z-index: 10000;
+        cursor: pointer;
+      }
+
+      .edit-toggle {
+        position: fixed;
+        top: clamp(0.75rem, 1.5vw, 1.1rem);
+        left: clamp(0.75rem, 1.5vw, 1.1rem);
+        z-index: 10001;
+        opacity: 0;
+        pointer-events: none;
+        border: 1px solid rgba(244, 236, 223, 0.26);
+        border-radius: 999px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: var(--caption-size);
+        font-weight: 700;
+        padding: clamp(0.45rem, 0.8vw, 0.6rem) clamp(0.6rem, 1vw, 0.8rem);
+        cursor: pointer;
+        transition:
+          opacity 0.25s var(--ease-out-expo),
+          transform 0.25s var(--ease-out-expo);
+      }
+
+      .edit-toggle.show,
+      .edit-toggle.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .edit-toggle:active {
+        transform: translateY(1px) scale(0.98);
+      }
+
+      .edit-banner {
+        position: fixed;
+        top: clamp(0.75rem, 1.5vw, 1.1rem);
+        left: 50%;
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-50%) translateY(calc(-1 * clamp(0.6rem, 1vh, 1rem)));
+        border: 1px solid rgba(244, 236, 223, 0.22);
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.9);
+        box-shadow: var(--inner-highlight), var(--shadow-soft);
+        color: var(--paper);
+        padding: clamp(0.45rem, 0.8vw, 0.6rem) clamp(0.7rem, 1.2vw, 1rem);
+        font-size: var(--caption-size);
+        font-weight: 700;
+        transition:
+          opacity 0.25s var(--ease-out-expo),
+          transform 0.25s var(--ease-out-expo);
+      }
+
+      .edit-banner.active {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      body.edit-active [data-editable="true"] {
+        outline: 1px dashed rgba(240, 90, 40, 0.78);
+        outline-offset: 0.18rem;
+        cursor: text;
+      }
+
+      body.edit-active [data-editable="true"]:focus {
+        background: rgba(240, 90, 40, 0.12);
+      }
+
+      @media (max-width: 820px) {
+        .title-layout,
+        .split-layout,
+        .wide-layout,
+        .closing-layout,
+        .compare-board,
+        .metric-strip,
+        .rule-board,
+        .risk-board,
+        .grid-2,
+        .grid-4,
+        .grid-asym,
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .input-board {
+          grid-template-columns: 1fr;
+          grid-template-rows: none;
+          grid-template-areas:
+            "hero"
+            "purpose"
+            "audience"
+            "pages"
+            "edit";
+          gap: clamp(0.65rem, 1.6vh, 1rem);
+          max-height: none;
+        }
+
+        .input-cell.hero {
+          min-height: auto;
+        }
+
+        .input-cell.hero strong {
+          font-size: clamp(2rem, 14vw, 4rem);
+        }
+
+        .grid-asym .tall {
+          grid-row: auto;
+        }
+
+        .orange-plate {
+          min-height: auto;
+          transform: none;
+        }
+
+        .slide.visible .orange-plate {
+          transform: none;
+        }
+
+        .metric-main {
+          min-height: auto;
+          transform: none;
+        }
+
+        .metric-strip {
+          max-height: none;
+          gap: clamp(0.65rem, 1.6vh, 1rem);
+        }
+
+        .lead,
+        .small-note {
+          max-width: 92vw;
+        }
+
+        h1 + .lead,
+        h2 + .lead,
+        h2 + .small-note,
+        .quote + .lead {
+          margin-top: clamp(0.65rem, 1.5vh, 1rem);
+        }
+
+        h2 + .compare-board,
+        h2 + .input-board,
+        h2 + .metric-strip,
+        h2 + .timeline,
+        h2 + .rule-board,
+        h2 + .risk-board,
+        h2 + .grid-2,
+        h2 + .grid-4,
+        h2 + .grid-asym {
+          margin-top: clamp(0.75rem, 2vh, 1.35rem);
+        }
+      }
+
+      @media (max-height: 700px) {
+        h1 {
+          font-size: clamp(1.7rem, 5vw, 4.25rem);
+          line-height: 1.04;
+        }
+
+        h2 {
+          font-size: clamp(1.35rem, 3.35vw, 2.9rem);
+          line-height: 1.08;
+        }
+
+        h3 {
+          font-size: clamp(0.88rem, 1.45vw, 1.2rem);
+          line-height: 1.16;
+        }
+
+        .lead {
+          font-size: clamp(0.74rem, 1.15vw, 0.95rem);
+          line-height: 1.58;
+        }
+
+        .quote {
+          font-size: clamp(1.55rem, 4vw, 3.4rem);
+          line-height: 1.08;
+        }
+
+        .orange-plate {
+          min-height: clamp(8rem, 28vh, 16rem);
+        }
+
+        .input-board {
+          max-height: min(52vh, 370px);
+        }
+
+        .input-cell.hero strong {
+          font-size: clamp(2rem, 5.6vw, 4.6rem);
+        }
+
+        .metric-strip {
+          max-height: min(50vh, 360px);
+        }
+
+        .metric-main {
+          min-height: clamp(7rem, 24vh, 12rem);
+        }
+
+        .metric-main strong {
+          font-size: clamp(2.5rem, 7vw, 5.5rem);
+        }
+
+        .caption-card {
+          padding: clamp(0.6rem, 1.2vw, 1rem);
+        }
+
+        h1 + .lead,
+        h2 + .lead,
+        h2 + .small-note,
+        .quote + .lead {
+          margin-top: clamp(0.55rem, 1.4vh, 0.95rem);
+        }
+
+        h2 + .compare-board,
+        h2 + .input-board,
+        h2 + .metric-strip,
+        h2 + .timeline,
+        h2 + .rule-board,
+        h2 + .risk-board,
+        h2 + .grid-2,
+        h2 + .grid-4,
+        h2 + .grid-asym {
+          margin-top: clamp(0.65rem, 1.8vh, 1.15rem);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-bar" aria-hidden="true"></div>
+    <nav class="nav-dots" aria-label="幻灯片导航"></nav>
+    <div class="keyboard-hint">Arrow keys / Space / E edit</div>
+
+    <div class="edit-hotzone" aria-hidden="true"></div>
+    <button class="edit-toggle" id="editToggle" type="button" title="Edit mode (E)">EDIT</button>
+    <div class="edit-banner" aria-live="polite">编辑模式：点击文字修改，Ctrl+S 导出 HTML</div>
+
+    <main>
+      <!-- ===========================================
+           SLIDE 01: TITLE
+           Opens with business value and selected Style A direction.
+           =========================================== -->
+      <section class="slide title-slide" data-page="01">
+        <div class="slide-content">
+          <div class="title-layout">
+            <div>
+              <p class="kicker reveal-left" data-editable="true">Business Technical Sharing</p>
+              <h1 class="reveal-left" data-editable="true">Frontend Slides 从安装到落地 PPT</h1>
+              <p class="lead reveal" data-editable="true">
+                面向商务团队的实战分享：用 Codex 技能把主题、风格、文案、注意点和可编辑 HTML PPT 串成一套可复用流程。
+              </p>
+            </div>
+            <article class="orange-plate reveal-scale">
+              <span class="tag" data-editable="true">Style A / Bold Signal</span>
+              <strong data-editable="true">15</strong>
+              <span class="tag" data-editable="true">pages / editable</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           SLIDE 02: AUDIENCE VALUE
+           Frames why a business team should care.
+           =========================================== -->
+      <section class="slide" data-page="02">
+        <div class="slide-content">
+          <p class="kicker reveal-left" data-editable="true">Why This Matters</p>
+          <h2 class="reveal-left" data-editable="true">对商务团队来说，PPT 不是设计活，是交付效率问题。</h2>
+          <div class="compare-board reveal">
+            <article class="compare-column light">
+              <h3 data-editable="true">传统做法</h3>
+              <ul class="bullet-list">
+                <li data-editable="true">先写 Word，再搬到 PowerPoint。</li>
+                <li data-editable="true">风格靠临时套模板，质量不稳定。</li>
+                <li data-editable="true">修改一版内容，经常牵动十几页排版。</li>
+              </ul>
+            </article>
+            <article class="compare-column">
+              <h3 data-editable="true">技能工作流</h3>
+              <ul class="bullet-list">
+                <li data-editable="true">先问清用途、受众、页数、内容状态。</li>
+                <li data-editable="true">先看风格预览，再生成正式稿。</li>
+                <li data-editable="true">交付一个浏览器可演示、可编辑的 HTML 文件。</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           SLIDE 03: WHAT ARE SKILLS
+           Explains the idea in business language.
+           =========================================== -->
+      <section class="slide" data-page="03">
+        <div class="slide-content">
+          <div class="split-layout">
+            <div>
+              <p class="kicker reveal-left" data-editable="true">Skill Basics</p>
+              <h2 class="reveal-left" data-editable="true">Skill 是把“怎么做”写进代理工作流。</h2>
+              <p class="lead reveal" data-editable="true">
+                它不是简单提示词，而是一份本地说明书：什么时候用、先问什么、读哪些文件、生成时必须守住哪些边界。
+              </p>
+            </div>
+            <article class="orange-plate reveal-scale">
+              <span class="tag" data-editable="true">Mental Model</span>
+              <strong data-editable="true">SOP</strong>
+              <span class="tag" data-editable="true">for AI execution</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           SLIDE 04: TWO SKILLS
+           Clarifies roles of frontend-slides and design taste.
+           =========================================== -->
+      <section class="slide" data-page="04">
+        <div class="slide-content">
+          <p class="kicker reveal-left" data-editable="true">Two Skills, Two Jobs</p>
+          <h2 class="reveal-left" data-editable="true">先用 frontend-slides 定演示流程，再用 design-taste-frontend 把质感拉上去。</h2>
+          <div class="compare-board reveal">
+            <article class="compare-column light">
+              <h3 data-editable="true">frontend-slides</h3>
+              <ul class="feature-list">
+                <li data-editable="true">内容发现：用途、页数、内容状态、编辑需求。</li>
+                <li data-editable="true">风格发现：先生成预览，再让用户选择。</li>
+                <li data-editable="true">生成约束：单文件、可导航、视口安全。</li>
+              </ul>
+            </article>
+            <article class="compare-column">
+              <h3 data-editable="true">design-taste-frontend</h3>
+              <ul class="feature-list">
+                <li data-editable="true">避免默认模板感和紫蓝渐变套路。</li>
+                <li data-editable="true">限制强调色、控制动效、保证移动端收敛。</li>
+                <li data-editable="true">用工程规则表达审美判断。</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================
+           SLIDE 05: INSTALLATION
+           Gives a practical installation and verification path.
+           =========================================== -->
+      <section class="slide" data-page="05">
+        <div class="slide-content">
+          <div class="split-layout">
+            <div>
+              <p class="kicker reveal-left" data-editable="true">Install</p>
+              <h2 class="reveal-left" data-editable="true">安装阶段不要只看“装上没”，要看技能是否能被发现。</h2>
+              <p class="small-note reveal" data-editable="true">
+                团队落地时建议把技能来源、版本、安装方式和本地路径写进内部文档，避免每个人的环境不一致。
+              </p>
+            </div>
+            <div class="code-card reveal-scale">
+              <header><span data-edita
