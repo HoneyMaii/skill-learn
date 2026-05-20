@@ -1,7 +1,7 @@
 # GitHub Wiki 快速上手（给每个 SKILL 写文档/手册）
 
 ## 一次性初始化
-1. 进入仓库主页：`https://github.com/<owner>/<repo>`（本仓库可替换为 `HoneyMaii/skill-learn`）
+1. 进入仓库主页：`https://github.com/<owner>/<repo>`（将 `<owner>/<repo>` 替换为你的仓库路径）
 2. 点击 **Wiki** 标签页；
 3. 首次进入时，点击 **Create the first page**；
 4. 创建 `Home` 页面，作为 SKILL 文档总目录。
