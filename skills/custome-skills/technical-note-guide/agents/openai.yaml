@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Note Guide"
+  short_description: "Build scrollable HTML technical tutorial guides."
+  default_prompt: "Turn my technical notes into a polished scrollable HTML tutorial guide with source notes and verification."
