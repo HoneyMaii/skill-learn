@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技术分享 — frontend-slides & taste-skill</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES (Dark Botanical)
+   =========================================== */
+:root {
+    --bg-primary: #0f0f0f;
+    --text-primary: #e8e4df;
+    --text-secondary: #9a9590;
+    --accent-warm: #d4a574;
+    --accent-pink: #e8b4b8;
+    --accent-gold: #c9b896;
+    --font-display: 'Cormorant', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration: 0.8s;
+}
+
+/* ===========================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   =========================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-weight: 300;
+}
+.slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 100%;
+    overflow: hidden;
+    padding: var(--slide-padding);
+}
+:root {
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+    --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    --small-size: clamp(0.65rem, 1vw, 0.875rem);
+    --slide-padding: clamp(1rem, 4vw, 4rem);
+    --content-gap: clamp(0.5rem, 2vw, 2rem);
+    --element-gap: clamp(0.25rem, 1vw, 1rem);
+}
+.card, .container, .content-box {
+    max-width: min(90vw, 1000px);
+    max-height: min(80vh, 700px);
+}
+.feature-list, .bullet-list { gap: clamp(0.4rem, 1vh, 1rem); }
+.feature-list li, .bullet-list li { font-size: var(--body-size); line-height: 1.4; }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+img, .image-container {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 3vw, 1.75rem);
+    }
+}
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+    }
+    .nav-dots, .keyboard-hint, .decorative { display: none; }
+}
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+@media (max-width: 600px) {
+    :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+    .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    html { scroll-behavior: auto; }
+}
+
+/* ===========================================
+   PROGRESS BAR
+   =========================================== */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-warm), var(--accent-pink));
+    z-index: 1000;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* ===========================================
+   NAVIGATION DOTS
+   =========================================== */
+.nav-dots {
+    position: fixed;
+    right: clamp(0.8rem, 2vw, 1.5rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+}
+.nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    opacity: 0.3;
+    cursor: pointer;
+    border: none;
+    transition: all 0.35s var(--ease-spring);
+    padding: 0;
+}
+.nav-dot:hover {
+    opacity: 0.7;
+    transform: scale(1.6);
+    background: var(--accent-pink);
+}
+.nav-dot.active {
+    opacity: 1;
+    background: var(--accent-warm);
+    transform: scale(1.3);
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(25px);
+    transition: opacity var(--duration) var(--ease-out-expo),
+                transform var(--duration) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.1s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.2s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.35s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.5s; }
+.slide.visible .reveal:nth-child(5) { transition-delay: 0.65s; }
+.slide.visible .reveal:nth-child(6) { transition-delay: 0.8s; }
+
+@keyframes drift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(15px, -10px) scale(1.05); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes breathe { 0%,100% { opacity: 0.10; transform: scale(1); } 50% { opacity: 0.18; transform: scale(1.08); } }
+
+/* ===========================================
+   GRAIN TEXTURE OVERLAY (taste-skill)
+   pointer-events-none, fixed, GPU-safe
+   =========================================== */
+.grain {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+}
+
+/* ===========================================
+   SPOTLIGHT BORDER (taste-skill)
+   Cards illuminate under cursor
+   =========================================== */
+.feature-item {
+    position: relative;
+    overflow: hidden;
+}
+.feature-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), var(--accent-warm), transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+.feature-item:hover::before { opacity: 0.6; }
+
+/* ===========================================
+   TACTILE FEEDBACK (taste-skill)
+   =========================================== */
+.feature-item:active,
+.workflow-step:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* ===========================================
+   SHARED COMPONENTS
+   =========================================== */
+.eyebrow {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--small-size);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: clamp(0.5rem, 2vh, 1.5rem);
+}
+h1, h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+}
+h1 { font-size: var(--title-size); }
+h2 { font-size: var(--h2-size); margin-bottom: clamp(0.5rem, 2vh, 1rem); }
+h1 em, h2 em { font-style: italic; color: var(--accent-pink); }
+.divider-line {
+    width: 40px; height: 1px;
+    background: var(--accent-gold);
+    margin: clamp(0.6rem, 1.5vh, 1rem) 0;
+}
+.subtitle-text {
+    font-size: var(--body-size);
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.tag {
+    display: inline-block;
+    border: 1px solid var(--accent-warm);
+    color: var(--accent-warm);
+    font-size: var(--small-size);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0.3em 1em;
+    margin-bottom: clamp(0.4rem, 1vh, 0.8rem);
+}
+
+/* ===========================================
+   SHAPES (decorative blurred orbs)
+   =========================================== */
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.12;
+    pointer-events: none;
+    animation: drift 14s ease-in-out infinite, breathe 8s ease-in-out infinite;
+}
+.shape-pink { background: var(--accent-pink); }
+.shape-warm { background: var(--accent-warm); }
+.shape-gold { background: var(--accent-gold); }
+
+/* Accent vertical line (left side) */
+.accent-vline {
+    position: absolute;
+    left: clamp(1.5rem, 6vw, 6rem);
+    top: 12%; bottom: 12%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--accent-warm), transparent);
+    opacity: 0;
+    transition: opacity 1s ease 0.3s;
+}
+.slide.visible .accent-vline { opacity: 0.4; }
+
+/* ===========================================
+   SLIDE 1: TITLE (Asymmetric — DESIGN_VARIANCE: 8)
+   =========================================== */
+.slide-title .slide-content {
+    align-items: flex-start;
+    text-align: left;
+    padding-left: clamp(2rem, 8vw, 10rem);
+}
+.slide-title h1 {
+    font-size: clamp(2.2rem, 6vw, 5rem);
+    max-width: 65vw;
+}
+.slide-title .subtitle-text {
+    max-width: 450px;
+    margin-top: clamp(0.5rem, 2vh, 1.5rem);
+}
+
+/* ===========================================
+   SLIDE 2 & 3: FEATURE SLIDES
+   =========================================== */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.6rem, 1.5vw, 1.2rem);
+    margin-top: clamp(0.5rem, 2vh, 1.5rem);
+    max-width: min(90vw, 900px);
+}
+.feature-item {
+    padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.8rem, 1.5vw, 1.2rem);
+    border-left: 2px solid var(--accent-gold);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    transition: border-color 0.3s ease, transform 0.15s var(--ease-spring);
+}
+.feature-item:hover { border-left-color: var(--accent-pink); }
+.feature-item h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--h3-size);
+    color: var(--accent-warm);
+    margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.feature-item p {
+    font-size: var(--small-size);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ===========================================
+   SLIDE 4: WORKFLOW
+   =========================================== */
+.workflow-steps {
+    display: flex;
+    gap: clamp(0.5rem, 1.5vw, 1.5rem);
+    margin-top: clamp(0.5rem, 2vh, 1.5rem);
+    max-width: min(90vw, 900px);
+    align-items: stretch;
+}
+.workflow-step {
+    flex: 1;
+    padding: clamp(0.8rem, 1.5vw, 1.2rem);
+    border-top: 2px solid var(--accent-gold);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    position: relative;
+    transition: transform 0.15s var(--ease-spring), border-color 0.3s ease;
+}
+.workflow-step:hover { border-top-color: var(--accent-pink); }
+.workflow-step .step-num {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600;
+    color: var(--accent-warm);
+    opacity: 0.3;
+    line-height: 1;
+    margin-bottom: clamp(0.3rem, 0.8vh, 0.6rem);
+}
+.workflow-step h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--h3-size);
+    color: var(--text-primary);
+    margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.workflow-step p {
+    font-size: var(--small-size);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ===========================================
+   SLIDE 5: CLOSING (Asymmetric — DESIGN_VARIANCE: 8)
+   =========================================== */
+.slide-closing .slide-content {
+    align-items: flex-start;
+    text-align: left;
+    padding-left: clamp(2rem, 8vw, 10rem);
+}
+.closing-points {
+    display: flex;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    margin-top: clamp(1rem, 3vh, 2rem);
+}
+.closing-point {
+    text-align: left;
+    max-width: 220px;
+}
+.closing-point .num {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 600;
+    color: var(--accent-warm);
+    line-height: 1;
+}
+.closing-point .label {
+    font-size: var(--small-size);
+    color: var(--text-secondary);
+    margin-top: clamp(0.2rem, 0.5vh, 0.4rem);
+    line-height: 1.4;
+}
+.closing-cta {
+    margin-top: clamp(1rem, 3vh, 2rem);
+    font-size: var(--body-size);
+    color: var(--accent-pink);
+    font-family: var(--font-display);
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<!-- Grain Texture Overlay (taste-skill: pointer-events-none, fixed) -->
+<div class="grain"></div>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ===========================================
+     SLIDE 1: TITLE (Asymmetric layout)
+     =========================================== -->
+<section class="slide slide-title" id="slide-0">
+    <div class="shape shape-pink" style="width:400px;height:400px;top:-10%;right:-5%;"></div>
+    <div class="shape shape-warm" style="width:280px;height:280px;bottom:5%;right:25%;animation-delay:-7s;"></div>
+    <div class="shape shape-gold" style="width:150px;height:150px;top:50%;right:45%;animation-delay:-3s;"></div>
+    <div class="accent-vline"></div>
+    <div class="slide-content">
+        <div class="eyebrow reveal">Superpowers Skills</div>
+        <h1 class="reveal"><span class="scramble" data-text="用 Taste 驱动">用 <em>Taste</em> 驱动</span><br><span class="scramble" data-text="前端品质">前端品质</span></h1>
+        <div class="divider-line reveal"></div>
+        <p class="subtitle-text reveal">
+            frontend-slides & taste-skill<br>
+            从幻灯片自动化到 UI 品质工程的技术分享
+        </p>
+    </div>
+</section>
+
+<!-- ===========================================
+     SLIDE 2: frontend-slides
+     =========================================== -->
+<section class="slide" id="slide-1">
+    <div class="shape shape-warm" style="width:300px;height:300px;top:5%;right:-5%;animation-delay:-4s;"></div>
+    <div class="shape shape-gold" style="width:200px;height:200px;bottom:10%;left:5%;animation-delay:-9s;"></div>
+    <div class="accent-vline"></div>
+    <div class="slide-content">
+        <div class="tag reveal">Skill 01</div>
+        <h2 class="reveal"><em>frontend-slides</em></h2>
+        <p class="subtitle-text reveal">零依赖、动画丰富的 HTML 演示文稿生成器</p>
+        <div class="feature-grid">
+            <div class="feature-item reveal">
+                <h3>零依赖</h3>
+                <p>单个 HTML 文件，内联 CSS/JS，无需 npm 或构建工具</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>视口适配</h3>
+                <p>每张幻灯片精确 100vh，所有尺寸用 clamp() 响应式缩放</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>12 种风格预设</h3>
+                <p>从 Neon Cyber 到 Dark Botanical，拒绝千篇一律的 AI 审美</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>PPT 转换</h3>
+                <p>自动提取 .pptx 内容、图片，转为动画网页演示</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>浏览器编辑</h3>
+                <p>可选的内联编辑模式，点击文字直接修改，Ctrl+S 保存</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>一键分享</h3>
+                <p>部署到 Vercel 生成链接，或导出 PDF，动画效果完美保留</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===========================================
+     SLIDE 3: taste-skill
+     =========================================== -->
+<section class="slide" id="slide-2">
+    <div class="shape shape-pink" style="width:280px;height:280px;bottom:5%;right:5%;animation-delay:-5s;"></div>
+    <div class="shape shape-warm" style="width:220px;height:220px;top:10%;left:-3%;animation-delay:-11s;"></div>
+    <div class="accent-vline"></div>
+    <div class="slide-content">
+        <div class="tag reveal">Skill 02</div>
+        <h2 class="reveal"><em>taste-skill</em></h2>
+        <p class="subtitle-text reveal">高级 UI/UX 工程技能，强制覆盖 LLM 的平庸倾向</p>
+        <div class="feature-grid">
+            <div class="feature-item reveal">
+                <h3>三个旋钮</h3>
+                <p>DESIGN_VARIANCE: 8 / MOTION_INTENSITY: 6 / VISUAL_DENSITY: 4</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>反平庸规则</h3>
+                <p>禁止 Inter 字体、紫色渐变、居中英雄区、三列等宽卡片</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>性能守卫</h3>
+                <p>只动画 transform/opacity，GPU 友好，永动循环必须隔离</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>创意军火库</h3>
+                <p>Bento Grid、视差倾斜卡片、动力学跑马灯、粒子爆炸按钮等</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>交互状态全覆盖</h3>
+                <p>Loading、Empty、Error、Tactile Feedback — 不再只生成静态成功态</p>
+            </div>
+            <div class="feature-item reveal">
+                <h3>7 点预飞检查</h3>
+                <p>输出前的最终验证矩阵，确保代码质量达标</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===========================================
+     SLIDE 4: SYNERGY / WORKFLOW
+     =========================================== -->
+<section class="slide" id="slide-3">
+    <div class="shape shape-gold" style="width:320px;height:320px;top:-5%;left:20%;animation-delay:-6s;"></div>
+    <div class="shape shape-pink" style="width:200px;height:200px;bottom:5%;right:10%;animation-delay:-2s;"></div>
+    <div class="accent-vline"></div>
+    <div class="slide-content">
+        <div class="eyebrow reveal">Synergy</div>
+        <h2 class="reveal">两个技能，<em>一套工作流</em></h2>
+        <p class="subtitle-text reveal">frontend-slides 负责生成，taste-skill 负责品质</p>
+        <div class="workflow-steps">
+            <div class="workflow-step reveal">
+                <div class="step-num">01</div>
+                <h3>内容发现</h3>
+                <p>确定用途、长度、内容来源，选择是否需要浏览器内编辑</p>
+            </div>
+            <div class="workflow-step reveal">
+                <div class="step-num">02</div>
+                <h3>风格发现</h3>
+                <p>3 个风格预览实时对比，用视觉而非文字描述来选择</p>
+            </div>
+            <div class="workflow-step reveal">
+                <div class="step-num">03</div>
+                <h3>taste 审查</h3>
+                <p>taste-skill 的反平庸规则确保最终输出不是"AI 味"设计</p>
+            </div>
+            <div class="workflow-step reveal">
+                <div class="step-num">04</div>
+                <h3>生成交付</h3>
+                <p>单文件 HTML，可部署到 Vercel 或导出 PDF 分享</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===========================================
+     SLIDE 5: CLOSING
+     =========================================== -->
+<section class="slide slide-closing" id="slide-4">
+    <div class="shape shape-warm" style="width:400px;height:400px;top:-10%;right:-5%;animation-delay:-8s;"></div>
+    <div class="shape shape-pink" style="width:250px;height:250px;bottom:10%;right:20%;animation-delay:-4s;"></div>
+    <div class="shape shape-gold" style="width:150px;height:150px;top:60%;left:5%;animation-delay:-10s;"></div>
+    <div class="accent-vline"></div>
+    <div class="slide-content">
+        <div class="eyebrow reveal">Summary</div>
+        <h1 class="reveal">告别 <em>"AI 味"</em></h1>
+        <div class="divider-line reveal"></div>
+        <div class="closing-points">
+            <div class="closing-point reveal">
+                <div class="num">01</div>
+                <div class="label">单文件零依赖<br>随时随地演示</div>
+            </div>
+            <div class="closing-point reveal">
+                <div class="num">02</div>
+                <div class="label">视觉驱动选择<br>不靠文字猜</div>
+            </div>
+            <div class="closing-point reveal">
+                <div class="num">03</div>
+                <div class="label">品味工程化<br>拒绝平庸输出</div>
+            </div>
+        </div>
+        <p class="closing-cta reveal">让每一次生成都值得展示</p>
+    </div>
+</section>
+
+<!-- ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== -->
+<script>
+/* ===========================================
+   TEXT SCRAMBLE EFFECT (taste-skill Creative Arsenal)
+   Matrix-style character decoding on load
+   =========================================== */
+class TextScramble {
+    constructor(el) {
+        this.el = el;
+        this.chars = '!<>-_\\/[]{}—=+*^?#________';
+        this.update = this.update.bind(this);
+    }
+    setText(newText) {
+        const oldText = this.el.innerText;
+        const length = Math.max(oldText.length, newText.length);
+        const promise = new Promise(resolve => this.resolve = resolve);
+        this.queue = [];
+        for (let i = 0; i < length; i++) {
+            const from = oldText[i] || '';
+            const to = newText[i] || '';
+            const start = Math.floor(Math.random() * 20);
+            const end = start + Math.floor(Math.random() * 20);
+            this.queue.push({ from, to, start, end });
+        }
+        cancelAnimationFrame(this.frameRequest);
+        this.frame = 0;
+        this.update();
+        return promise;
+    }
+    update() {
+        let output = '', complete = 0;
+        for (let i = 0, n = this.queue.length; i < n; i++) {
+            let { from, to, start, end, char } = this.queue[i];
+            if (this.frame >= end) {
+                complete++;
+                output += to;
+            } else if (this.frame >= start) {
+                if (!char || Math.random() < 0.28) {
+                    char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                    this.queue[i].char = char;
+                }
+                output += char;
+            } else {
+                output += from;
+            }
+        }
+        this.el.innerHTML = output;
+        if (complete === this.queue.length) {
+            this.resolve();
+        } else {
+            this.frameRequest = requestAnimationFrame(this.update);
+            this.frame++;
+        }
+    }
+}
+
+/* Trigger scramble on slide visibility */
+function initScramble() {
+    const scrambleEls = document.querySelectorAll('.scramble');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !entry.target.dataset.scrambled) {
+                entry.target.dataset.scrambled = 'true';
+                const original = entry.target.innerHTML;
+                const fx = new TextScramble(entry.target);
+                fx.setText(entry.target.dataset.text).then(() => {
+                    entry.target.innerHTML = original;
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+    scrambleEls.forEach(el => observer.observe(el));
+}
+
+/* ===========================================
+   SPOTLIGHT BORDER (taste-skill)
+   Feature cards illuminate under cursor
+   =========================================== */
+function initSpotlight() {
+    document.querySelectorAll('.feature-item').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mx', x + '%');
+            card.style.setProperty('--my', y + '%');
+        });
+    });
+}
+
+/* Init on DOM ready */
+document.addEventListener('DOMContentLoaded', () => {
+    initScramble();
+    initSpotlight();
+});
+
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.isScrolling = false;
+        this.navDotsContainer = document.getElementById('navDots');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupProgressBar();
+        this.setupNavDots();
+    }
+
+    setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const idx = Array.from(this.slides).indexOf(entry.target);
+                    this.currentSlide = idx;
+                    this.updateNavDots();
+                    this.updateProgress();
+                }
+            });
+        }, { threshold: 0.5 });
+        this.slides.forEach(s => observer.observe(s));
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable')) return;
+            switch(e.key) {
+                case 'ArrowDown': case ' ': case 'PageDown':
+                    e.preventDefault(); this.goTo(this.currentSlide + 1); break;
+                case 'ArrowUp': case 'PageUp':
+                    e.preventDefault(); this.goTo(this.currentSlide - 1); break;
+                case 'ArrowRight':
+                    e.preventDefault(); this.goTo(this.currentSlide + 1); break;
+                case 'ArrowLeft':
+                    e.preventDefault(); this.goTo(this.currentSlide - 1); break;
+                case 'Home':
+                    e.preventDefault(); this.goTo(0); break;
+                case 'End':
+                    e.preventDefault(); this.goTo(this.slides.length - 1); break;
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startY = 0;
+        document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            const diff = startY - e.changedTouches[0].clientY;
+            if (Math.abs(diff) > 50) {
+                this.goTo(this.currentSlide + (diff > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        document.addEventListener('wheel', (e) => {
+            if (this.isScrolling) return;
+            if (Math.abs(e.deltaY) > 30) {
+                this.isScrolling = true;
+                this.goTo(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+                setTimeout(() => { this.isScrolling = false; }, 800);
+            }
+        }, { passive: true });
+    }
+
+    goTo(index) {
+        if (index < 0 || index >= this.slides.length) return;
+        this.currentSlide = index;
+        this.slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    setupProgressBar() {
+        this.updateProgress();
+    }
+
+    updateProgress() {
+        const pct = ((this.currentSlide + 1) / this.slides.length) * 100;
+        this.progressBar.style.width = pct + '%';
+    }
+
+    setupNavDots() {
+        this.navDotsContainer.innerHTML = '';
+        this.slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            dot.addEventListener('click', () => this.goTo(i));
+            this.navDotsContainer.appendChild(dot);
+        });
+    }
+
+    updateNavDots() {
+        const dots = this.navDotsContainer.querySelectorAll('.nav-dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === this.currentSlide));
+    }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>
